@@ -9,7 +9,7 @@ class Group(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="groups",
+        related_name="teaching_groups",
         limit_choices_to={"role": "teacher"},
     )
 
