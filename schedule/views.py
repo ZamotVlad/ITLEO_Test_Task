@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 
 from students.permissions import IsAdminOrOwnTeacher
+
 from .models import Group, Schedule
 from .serializers import GroupSerializer, ScheduleSerializer
 
