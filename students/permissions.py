@@ -8,7 +8,7 @@ class IsAdminOrOwnTeacher(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        if request.user.role == "admin":
+        if request.user.role.lower() == "admin":
             return True
 
         if hasattr(obj, "teacher_id"):  # Group
