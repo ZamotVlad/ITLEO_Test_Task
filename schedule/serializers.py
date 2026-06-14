@@ -20,9 +20,12 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    teacher_name = serializers.CharField(source="teacher.get_full_name", read_only=True)
+    teacher_name = serializers.SerializerMethodField()
     schedule_entries = ScheduleSerializer(many=True, read_only=True)
 
     class Meta:
         model = Group
         fields = ["id", "name", "teacher", "teacher_name", "schedule_entries"]
+
+    def get_teacher_name(self, obj):
+        return obj.teacher.get_full_name() if obj.teacher else None
