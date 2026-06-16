@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -7,6 +9,14 @@ from asgiref.sync import sync_to_async
 from django.db.models import Q
 
 router = Router()
+
+
+# --- Перевірка доступу ---
+
+
+def is_admin_or_teacher(chat_id):
+    allowed = os.getenv("TELEGRAM_ADMIN_CHAT_IDS", "")
+    return str(chat_id) in [x.strip() for x in allowed.split(",") if x.strip()]
 
 
 # --- Допоміжні функції ---
@@ -125,12 +135,15 @@ async def cmd_start(message: Message):
         "/debtors — список боржників\n"
         "/group <назва> — інфо про групу\n"
         "/remind — нагадати про оплату\n"
-        "/broadcast <група> <текст> — розсилка групі"
+        "/broadcast <група> | <текст> — розсилка групі"
     )
 
 
 @router.message(Command("add_student"))
 async def cmd_add_student(message: Message, state: FSMContext):
+    if not is_admin_or_teacher(message.chat.id):
+        await message.answer("⛔ Ця команда доступна лише адміністраторам.")
+        return
     await state.set_state(AddStudentForm.full_name)
     await message.answer("Введіть повне ім'я студента:")
 
@@ -171,12 +184,18 @@ async def process_status(message: Message, state: FSMContext):
 
 @router.message(Command("debtors"))
 async def cmd_debtors(message: Message):
+    if not is_admin_or_teacher(message.chat.id):
+        await message.answer("⛔ Ця команда доступна лише адміністраторам.")
+        return
     text = await get_debtors_list()
     await message.answer(text)
 
 
 @router.message(Command("group"))
 async def cmd_group(message: Message):
+    if not is_admin_or_teacher(message.chat.id):
+        await message.answer("⛔ Ця команда доступна лише адміністраторам.")
+        return
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
         await message.answer("Використання: /group <назва групи>")
@@ -190,19 +209,32 @@ async def cmd_group(message: Message):
 
 @router.message(Command("remind"))
 async def cmd_remind(message: Message):
+    if not is_admin_or_teacher(message.chat.id):
+        await message.answer("⛔ Ця команда доступна лише адміністраторам.")
+        return
     sent, skipped = await do_remind()
     await message.answer(f"Нагадування надіслано: {sent}\nПропущено (немає Telegram): {skipped}")
 
 
 @router.message(Command("broadcast"))
 async def cmd_broadcast(message: Message):
-    args = message.text.split(maxsplit=2)
-    if len(args) < 3:
-        await message.answer("Використання: /broadcast <назва групи> <текст>")
+    if not is_admin_or_teacher(message.chat.id):
+        await message.answer("⛔ Ця команда доступна лише адміністраторам.")
         return
-    result = await do_broadcast(args[1], args[2])
+    parts = message.text.split("|", maxsplit=1)
+    if len(parts) < 2:
+        await message.answer(
+            "Використання: /broadcast <назва групи> | <текст>\n"
+            "Приклад: /broadcast Python Pro | Привіт, група!"
+        )
+        return
+    group_name = parts[0].replace("/broadcast", "").strip()
+    text = parts[1].strip()
+    result = await do_broadcast(group_name, text)
     if result is None:
-        await message.answer(f"Група '{args[1]}' не знайдена.")
+        await message.answer(f"Група '{group_name}' не знайдена.")
         return
     sent, skipped = result
-    await message.answer(f"Розсилка по групі '{args[1]}':\nНадіслано: {sent}\nПропущено: {skipped}")
+    await message.answer(
+        f"Розсилка по групі '{group_name}':\nНадіслано: {sent}\nПропущено: {skipped}"
+    )
