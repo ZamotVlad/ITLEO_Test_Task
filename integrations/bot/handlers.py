@@ -45,7 +45,6 @@ def get_formatted_group_info(group_name):
             .prefetch_related("schedule_entries", "students")
             .get(name__iexact=group_name)
         )
-
         teacher = group.teacher.get_full_name() if group.teacher else "Не призначено"
         schedule = (
             "\n".join(
@@ -55,7 +54,6 @@ def get_formatted_group_info(group_name):
             or "Розклад не заповнений"
         )
         students = "\n".join(f"  {s.full_name}" for s in group.students.all()) or "Студентів немає"
-
         return (
             f"Група: {group.name}\n"
             f"Викладач: {teacher}\n\n"
@@ -77,6 +75,25 @@ def create_student(data):
         course=course,
         status=data["status"],
     )
+
+
+@sync_to_async
+def do_remind():
+    from notifications.services import remind_debtors_telegram
+
+    return remind_debtors_telegram()
+
+
+@sync_to_async
+def do_broadcast(group_name, text):
+    from notifications.services import broadcast_to_group
+    from schedule.models import Group
+
+    try:
+        group = Group.objects.get(name__iexact=group_name)
+        return broadcast_to_group(group.id, text)
+    except Group.DoesNotExist:
+        return None
 
 
 # --- FSM для /add_student ---
@@ -164,10 +181,28 @@ async def cmd_group(message: Message):
     if len(args) < 2:
         await message.answer("Використання: /group <назва групи>")
         return
-
     text_response = await get_formatted_group_info(args[1])
     if not text_response:
         await message.answer(f"Група '{args[1]}' не знайдена.")
         return
-
     await message.answer(text_response)
+
+
+@router.message(Command("remind"))
+async def cmd_remind(message: Message):
+    sent, skipped = await do_remind()
+    await message.answer(f"Нагадування надіслано: {sent}\nПропущено (немає Telegram): {skipped}")
+
+
+@router.message(Command("broadcast"))
+async def cmd_broadcast(message: Message):
+    args = message.text.split(maxsplit=2)
+    if len(args) < 3:
+        await message.answer("Використання: /broadcast <назва групи> <текст>")
+        return
+    result = await do_broadcast(args[1], args[2])
+    if result is None:
+        await message.answer(f"Група '{args[1]}' не знайдена.")
+        return
+    sent, skipped = result
+    await message.answer(f"Розсилка по групі '{args[1]}':\nНадіслано: {sent}\nПропущено: {skipped}")
