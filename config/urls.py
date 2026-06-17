@@ -5,6 +5,7 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
 from notifications.views import NotificationViewSet
@@ -30,4 +31,5 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("api/auth/token/", obtain_auth_token),
 ]
