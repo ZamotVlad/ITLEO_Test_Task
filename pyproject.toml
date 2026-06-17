@@ -8,3 +8,10 @@ ignore = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["accounts", "students", "schedule", "dashboard", "integrations", "notifications"]
+
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
