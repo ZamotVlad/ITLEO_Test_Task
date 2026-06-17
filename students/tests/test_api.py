@@ -1,13 +1,13 @@
-import pytest
 from datetime import date
-from rest_framework.test import APIClient
+
+import pytest
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
 from accounts.models import User
 from payments.models import Payment
 from schedule.models import Group
 from students.models import Course, Student
-
 
 # --- Fixtures ---
 

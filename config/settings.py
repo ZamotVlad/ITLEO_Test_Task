@@ -77,7 +77,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -147,8 +147,10 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Admin site customization
 UNFOLD = {
-    "SITE_TITLE": "ITLEO Test Task",
-    "SITE_HEADER": "ITLEO Admin",
+    "SITE_TITLE": "ITLEO Admin",
+    "SITE_HEADER": "ITLEO Academy",
+    "SITE_URL": "/",
+    "DASHBOARD_CALLBACK": "dashboard.views.dashboard_callback",
 }
 
 AUTH_USER_MODEL = "accounts.User"
