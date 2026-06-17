@@ -17,6 +17,8 @@ class Payment(models.Model):
     comment = models.TextField(blank=True)
 
     class Meta:
+        verbose_name = "Оплата"
+        verbose_name_plural = "Оплати"
         indexes = [
             models.Index(fields=["status"]),
             models.Index(fields=["date"]),

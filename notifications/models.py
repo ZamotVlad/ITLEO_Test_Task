@@ -12,6 +12,8 @@ class NotificationLog(models.Model):
     sent_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "Лог сповіщень"
+        verbose_name_plural = "Логи сповіщень"
         indexes = [
             models.Index(fields=["status"]),
             models.Index(fields=["type"]),

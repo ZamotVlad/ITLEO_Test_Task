@@ -12,5 +12,9 @@ class GoogleAccount(models.Model):
     is_connected = models.BooleanField(default=False)
     last_synced_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        verbose_name = "Google акаунт"
+        verbose_name_plural = "Google акаунти"
+
     def __str__(self):
         return f"GoogleAccount({self.user.username})"

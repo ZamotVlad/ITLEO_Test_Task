@@ -40,6 +40,8 @@ class Schedule(models.Model):
     google_event_id = models.CharField(max_length=255, blank=True)
 
     class Meta:
+        verbose_name = "Розклад"
+        verbose_name_plural = "Розклад"
         indexes = [models.Index(fields=["weekday"])]
         ordering = ["weekday", "start_time"]
 

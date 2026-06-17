@@ -4,6 +4,10 @@ from django.db import models
 class Course(models.Model):
     name = models.CharField(max_length=100)
 
+    class Meta:
+        verbose_name = "Курс"
+        verbose_name_plural = "Курси"
+
     def __str__(self):
         return self.name
 
@@ -31,6 +35,8 @@ class Student(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name = "Студент"
+        verbose_name_plural = "Студенти"
         indexes = [
             models.Index(fields=["status"]),
             models.Index(fields=["telegram_chat_id"]),
