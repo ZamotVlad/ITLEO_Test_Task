@@ -13,6 +13,11 @@ class Group(models.Model):
         limit_choices_to={"role": "teacher"},
     )
 
+    class Meta:
+        verbose_name = "Група"
+        verbose_name_plural = "Групи"
+        ordering = ["name"]
+
     def __str__(self):
         return self.name
 
