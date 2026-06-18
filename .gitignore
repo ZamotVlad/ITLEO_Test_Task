@@ -337,4 +337,6 @@ $RECYCLE.BIN/
 
 .ruff_cache/
 
+staticfiles/
+
 # End of https://www.toptal.com/developers/gitignore/api/database,python,venv,windows,django,visualstudiocode,redis
