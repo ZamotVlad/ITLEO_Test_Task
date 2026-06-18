@@ -4,18 +4,21 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('students', '0001_initial'),
+        ("students", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='course',
-            options={'verbose_name': 'Курс', 'verbose_name_plural': 'Курси'},
+            name="course",
+            options={"verbose_name": "Курс", "verbose_name_plural": "Курси"},
         ),
         migrations.AlterModelOptions(
-            name='student',
-            options={'ordering': ['-created_at'], 'verbose_name': 'Студент', 'verbose_name_plural': 'Студенти'},
+            name="student",
+            options={
+                "ordering": ["-created_at"],
+                "verbose_name": "Студент",
+                "verbose_name_plural": "Студенти",
+            },
         ),
     ]

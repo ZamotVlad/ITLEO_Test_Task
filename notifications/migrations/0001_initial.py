@@ -4,26 +4,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='NotificationLog',
+            name="NotificationLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(choices=[('email', 'Email'), ('telegram', 'Telegram')], max_length=20)),
-                ('recipient', models.CharField(max_length=255)),
-                ('message', models.TextField()),
-                ('status', models.CharField(choices=[('sent', 'Sent'), ('failed', 'Failed')], default='sent', max_length=20)),
-                ('sent_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[("email", "Email"), ("telegram", "Telegram")], max_length=20
+                    ),
+                ),
+                ("recipient", models.CharField(max_length=255)),
+                ("message", models.TextField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("sent", "Sent"), ("failed", "Failed")],
+                        default="sent",
+                        max_length=20,
+                    ),
+                ),
+                ("sent_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'ordering': ['-sent_at'],
-                'indexes': [models.Index(fields=['status'], name='notificatio_status_a242db_idx'), models.Index(fields=['type'], name='notificatio_type_0047cc_idx')],
+                "ordering": ["-sent_at"],
+                "indexes": [
+                    models.Index(fields=["status"], name="notificatio_status_a242db_idx"),
+                    models.Index(fields=["type"], name="notificatio_type_0047cc_idx"),
+                ],
             },
         ),
     ]

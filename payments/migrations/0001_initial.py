@@ -5,27 +5,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('students', '0001_initial'),
+        ("students", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Payment',
+            name="Payment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('date', models.DateField()),
-                ('status', models.CharField(choices=[('paid', 'Оплачено'), ('pending', 'Очікується'), ('debt', 'Борг')], default='pending', max_length=20)),
-                ('comment', models.TextField(blank=True)),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payments', to='students.student')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("date", models.DateField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("paid", "Оплачено"), ("pending", "Очікується"), ("debt", "Борг")],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("comment", models.TextField(blank=True)),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payments",
+                        to="students.student",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-date'],
-                'indexes': [models.Index(fields=['status'], name='payments_pa_status_7ad4af_idx'), models.Index(fields=['date'], name='payments_pa_date_f2f1ad_idx')],
+                "ordering": ["-date"],
+                "indexes": [
+                    models.Index(fields=["status"], name="payments_pa_status_7ad4af_idx"),
+                    models.Index(fields=["date"], name="payments_pa_date_f2f1ad_idx"),
+                ],
             },
         ),
     ]

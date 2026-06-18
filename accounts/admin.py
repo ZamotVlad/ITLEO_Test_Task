@@ -9,6 +9,4 @@ from .models import User
 class CustomUserAdmin(ModelAdmin, UserAdmin):
     list_display = ("username", "email", "role", "is_staff", "is_active")
     list_filter = ("role", "is_staff")
-    fieldsets = UserAdmin.fieldsets + (
-        ("Роль", {"fields": ("role",)}),
-    )
+    fieldsets = UserAdmin.fieldsets + (("Роль", {"fields": ("role",)}),)

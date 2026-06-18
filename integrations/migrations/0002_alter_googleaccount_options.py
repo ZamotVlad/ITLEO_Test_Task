@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('integrations', '0001_initial'),
+        ("integrations", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='googleaccount',
-            options={'verbose_name': 'Google акаунт', 'verbose_name_plural': 'Google акаунти'},
+            name="googleaccount",
+            options={"verbose_name": "Google акаунт", "verbose_name_plural": "Google акаунти"},
         ),
     ]

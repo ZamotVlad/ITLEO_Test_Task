@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,15 +14,27 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='GoogleAccount',
+            name="GoogleAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('access_token', models.TextField(blank=True)),
-                ('refresh_token', models.TextField(blank=True)),
-                ('token_expiry', models.DateTimeField(blank=True, null=True)),
-                ('is_connected', models.BooleanField(default=False)),
-                ('last_synced_at', models.DateTimeField(blank=True, null=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='google_account', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("access_token", models.TextField(blank=True)),
+                ("refresh_token", models.TextField(blank=True)),
+                ("token_expiry", models.DateTimeField(blank=True, null=True)),
+                ("is_connected", models.BooleanField(default=False)),
+                ("last_synced_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="google_account",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

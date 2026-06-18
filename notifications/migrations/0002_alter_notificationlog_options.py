@@ -4,14 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('notifications', '0001_initial'),
+        ("notifications", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='notificationlog',
-            options={'ordering': ['-sent_at'], 'verbose_name': 'Лог сповіщень', 'verbose_name_plural': 'Логи сповіщень'},
+            name="notificationlog",
+            options={
+                "ordering": ["-sent_at"],
+                "verbose_name": "Лог сповіщень",
+                "verbose_name_plural": "Логи сповіщень",
+            },
         ),
     ]
