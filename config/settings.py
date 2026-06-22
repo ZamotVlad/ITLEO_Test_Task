@@ -149,8 +149,8 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Admin site customization
 UNFOLD = {
-    "SITE_TITLE": "ITLEO Admin",
-    "SITE_HEADER": "ITLEO Academy",
+    "SITE_TITLE": "Admin",
+    "SITE_HEADER": "Academy",
     "SITE_URL": "/",
     "DASHBOARD_CALLBACK": "dashboard.views.dashboard_callback",
 }
@@ -172,7 +172,7 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "ITLEO Academy API",
+    "TITLE": "Academy API",
     "VERSION": "1.0.0",
 }
 
