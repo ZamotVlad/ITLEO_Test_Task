@@ -1,24 +1,23 @@
 from rest_framework import viewsets
 
-from .models import Course, Student
-from .permissions import IsAdminOrOwnTeacher
+from .models import Course
+from .permissions import RoleBasedPermission
 from .serializers import CourseSerializer, StudentSerializer
+from .services import scope_students
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsAdminOrOwnTeacher]
+    permission_classes = [RoleBasedPermission]
 
 
 class StudentViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
-    permission_classes = [IsAdminOrOwnTeacher]
+    permission_classes = [RoleBasedPermission]
     filterset_fields = ["status", "group", "course"]
     search_fields = ["full_name", "phone"]
 
     def get_queryset(self):
-        qs = Student.objects.select_related("group", "course")
-        if self.request.user.role.lower() == "teacher":
-            qs = qs.filter(group__teacher=self.request.user)
-        return qs
+        # Вся складна логіка N+1 і фільтрації тепер під капотом!
+        return scope_students(self.request.user)

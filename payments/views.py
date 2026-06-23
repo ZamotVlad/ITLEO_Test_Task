@@ -2,22 +2,18 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from students.permissions import IsAdminOrOwnTeacher
-from students.services import get_debtors
+from students.permissions import RoleBasedPermission
+from students.services import get_debtors, scope_payments
 
-from .models import Payment
 from .serializers import PaymentSerializer
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
-    permission_classes = [IsAdminOrOwnTeacher]
+    permission_classes = [RoleBasedPermission]
 
     def get_queryset(self):
-        qs = Payment.objects.select_related("student", "student__group")
-        if self.request.user.role.lower() == "teacher":
-            qs = qs.filter(student__group__teacher=self.request.user)
-        return qs
+        return scope_payments(self.request.user)
 
     @action(detail=False, methods=["get"])
     def debtors(self, request):
