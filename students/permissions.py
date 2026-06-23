@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from accounts.roles import Roles
 
@@ -11,10 +11,18 @@ class RoleBasedPermission(BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        # Тільки owner може видаляти
-        if request.method == "DELETE" and request.user.role != Roles.OWNER:
-            return False
-        return True
+
+        if request.user.role == Roles.OWNER:
+            return True
+
+        if request.user.role == Roles.MANAGER:
+            return request.method != "DELETE"
+
+        # Teacher, Parent, Student — тільки читання
+        if request.user.role in [Roles.TEACHER, Roles.PARENT, Roles.STUDENT]:
+            return request.method in SAFE_METHODS
+
+        return False
 
     def has_object_permission(self, request, view, obj):
         user = request.user
