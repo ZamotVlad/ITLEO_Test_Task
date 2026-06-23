@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Course, Student
+from .models import Course, Parent, Student
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -35,3 +35,22 @@ class StudentSerializer(serializers.ModelSerializer):
 
     def get_group_name(self, obj):
         return obj.group.name if obj.group else None
+
+
+class ParentSerializer(serializers.ModelSerializer):
+    student_names = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Parent
+        fields = [
+            "id",
+            "full_name",
+            "phone",
+            "email",
+            "user",
+            "students",
+            "student_names",
+        ]
+
+    def get_student_names(self, obj):
+        return [s.full_name for s in obj.students.all()]

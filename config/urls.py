@@ -8,10 +8,11 @@ from drf_spectacular.views import (
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
+from accounts.views import UserViewSet
 from notifications.views import NotificationViewSet
 from payments.views import PaymentViewSet
 from schedule.views import GroupViewSet, ScheduleViewSet
-from students.views import CourseViewSet, StudentViewSet
+from students.views import CourseViewSet, ParentViewSet, StudentViewSet
 
 router = DefaultRouter()
 router.register(r"courses", CourseViewSet, basename="course")
@@ -20,6 +21,8 @@ router.register(r"groups", GroupViewSet, basename="group")
 router.register(r"schedule", ScheduleViewSet, basename="schedule")
 router.register(r"payments", PaymentViewSet, basename="payment")
 router.register(r"notifications", NotificationViewSet, basename="notification")
+router.register(r"users", UserViewSet, basename="user")
+router.register(r"parents", ParentViewSet, basename="parent")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
