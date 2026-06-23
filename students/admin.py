@@ -1,7 +1,62 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.core.mail import send_mail
+from django.db import transaction
+from import_export.admin import ExportMixin
 from unfold.admin import ModelAdmin
 
-from .models import Course, Student
+from accounts.models import User
+from accounts.roles import OPERATIONAL_ROLES, Roles
+from students.models import Course, Parent, Student
+from students.services import scope_students
+
+
+@admin.action(description="Створити логін і надіслати запрошення на email")
+def create_login_action(modeladmin, request, queryset):
+    created = 0
+    skipped = 0
+
+    for obj in queryset.filter(user__isnull=True):
+        email = getattr(obj, "email", "")
+        if not email:
+            skipped += 1
+            continue
+        if User.objects.filter(email=email).exists():
+            skipped += 1
+            continue
+
+        role = Roles.PARENT if isinstance(obj, Parent) else Roles.STUDENT
+
+        with transaction.atomic():
+            password = User.objects.make_random_password(length=12)
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=password,
+                role=role,
+            )
+            obj.user = user
+            obj.save(update_fields=["user"])
+
+        send_mail(
+            subject="Запрошення до Academy",
+            message=(
+                f"Вітаємо!\n\n"
+                f"Ваш акаунт створено.\n"
+                f"Логін: {email}\n"
+                f"Пароль: {password}\n\n"
+                f"Будь ласка, змініть пароль після першого входу."
+            ),
+            from_email=None,
+            recipient_list=[email],
+            fail_silently=True,
+        )
+        created += 1
+
+    modeladmin.message_user(
+        request,
+        f"Створено: {created}, пропущено: {skipped}",
+        messages.SUCCESS,
+    )
 
 
 @admin.register(Course)
@@ -11,13 +66,30 @@ class CourseAdmin(ModelAdmin):
 
 
 @admin.register(Student)
-class StudentAdmin(ModelAdmin):
-    list_display = ("full_name", "course", "group", "status", "phone")
+class StudentAdmin(ExportMixin, ModelAdmin):
+    list_display = ("full_name", "course", "group", "status", "email", "user")
     list_filter = ("status", "course", "group")
-    search_fields = ("full_name", "phone", "telegram_username")
+    search_fields = ("full_name", "phone", "telegram_username", "email")
+    actions = [create_login_action]
+
+    def has_export_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.role == Roles.OWNER
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.role == "teacher":
-            return qs.filter(group__teacher=request.user)
-        return qs
+        return scope_students(request.user)
+
+
+@admin.register(Parent)
+class ParentAdmin(ExportMixin, ModelAdmin):
+    list_display = ("full_name", "phone", "email", "user")
+    search_fields = ("full_name", "phone", "email")
+    actions = [create_login_action]
+
+    def has_export_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.role == Roles.OWNER
