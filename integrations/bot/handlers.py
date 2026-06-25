@@ -106,6 +106,61 @@ def do_broadcast(group_name, text):
         return None
 
 
+@sync_to_async
+def get_all_schedules():
+    from schedule.models import Group
+
+    groups = Group.objects.prefetch_related("schedule_entries").select_related("teacher").all()
+    lines = []
+    for group in groups:
+        teacher_name = group.teacher.get_full_name() if group.teacher else "—"
+        lines.append(f"\n📚 {group.name} ({teacher_name})")
+        for entry in group.schedule_entries.all():
+            lines.append(
+                f"  {entry.get_weekday_display()} "
+                f"{entry.start_time.strftime('%H:%M')}–"
+                f"{entry.end_time.strftime('%H:%M')}"
+            )
+    return "\n".join(lines) if lines else "Розклад порожній"
+
+
+@sync_to_async
+def get_stats():
+    from payments.models import Payment
+    from schedule.models import Group
+    from students.models import Student
+
+    return {
+        "total": Student.objects.count(),
+        "studying": Student.objects.filter(status="studying").count(),
+        "debt": Payment.objects.filter(status="debt").count(),
+        "groups": Group.objects.count(),
+    }
+
+
+@router.message(Command("schedule"))
+async def cmd_schedule(message: Message):
+    if not is_admin_or_teacher(message.chat.id):
+        await message.answer("⛔ Ця команда доступна лише адміністраторам.")
+        return
+    text = await get_all_schedules()
+    await message.answer(f"Розклад академії:{text}")
+
+
+@router.message(Command("stats"))
+async def cmd_stats(message: Message):
+    if not is_admin_or_teacher(message.chat.id):
+        await message.answer("⛔ Ця команда доступна лише адміністраторам.")
+        return
+    s = await get_stats()
+    await message.answer(
+        f"📊 Статистика академії:\n"
+        f"👥 Студентів: {s['total']} (навчається: {s['studying']})\n"
+        f"💰 Боржників: {s['debt']}\n"
+        f"🏫 Груп: {s['groups']}"
+    )
+
+
 # --- FSM для /add_student ---
 
 
@@ -129,13 +184,15 @@ async def cmd_start(message: Message):
             await message.answer(f"Привіт, {student.full_name}! Твій акаунт підключено до системи.")
             return
     await message.answer(
-        "Привіт! Я бот ITLEO Academy.\n\n"
+        "Привіт! Я бот Academy.\n\n"
         "Команди:\n"
         "/add_student — додати студента\n"
         "/debtors — список боржників\n"
         "/group <назва> — інфо про групу\n"
         "/remind — нагадати про оплату\n"
-        "/broadcast <група> | <текст> — розсилка групі"
+        "/broadcast <група> | <текст> — розсилка групі\n"
+        "/schedule — розклад академії\n"
+        "/stats — статистика"
     )
 
 
