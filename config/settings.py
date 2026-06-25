@@ -150,10 +150,143 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Admin site customization
 UNFOLD = {
-    "SITE_TITLE": "Admin",
+    "SITE_TITLE": "Academy Admin",
     "SITE_HEADER": "Academy",
     "SITE_URL": "/",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": False,
     "DASHBOARD_CALLBACK": "dashboard.views.dashboard_callback",
+    # Кастомна login-сторінка
+    "LOGIN": {
+        "image": "",
+        "redirect_after": "/admin/",
+    },
+    # Чб схема — нейтральна, схожа на Bootstrap за відчуттям
+    "COLORS": {
+        "base": {
+            "50": "250 250 250",
+            "100": "244 244 245",
+            "200": "228 228 231",
+            "300": "212 212 216",
+            "400": "161 161 170",
+            "500": "113 113 122",
+            "600": "82 82 91",
+            "700": "63 63 70",
+            "800": "39 39 42",
+            "900": "24 24 27",
+            "950": "9 9 11",
+        },
+        "primary": {
+            "50": "240 249 255",
+            "100": "224 242 254",
+            "200": "186 230 253",
+            "300": "125 211 252",
+            "400": "56 189 248",
+            "500": "14 165 233",
+            "600": "2 132 199",
+            "700": "3 105 161",
+            "800": "7 89 133",
+            "900": "12 74 110",
+            "950": "8 47 73",
+        },
+    },
+    # Кастомний сайдбар
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": "Управління",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Студенти",
+                        "icon": "school",
+                        "link": "/admin/students/student/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                    {
+                        "title": "Батьки",
+                        "icon": "family_restroom",
+                        "link": "/admin/students/parent/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                    {
+                        "title": "Курси",
+                        "icon": "menu_book",
+                        "link": "/admin/students/course/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                ],
+            },
+            {
+                "title": "Розклад",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Групи",
+                        "icon": "groups",
+                        "link": "/admin/schedule/group/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                    {
+                        "title": "Розклад",
+                        "icon": "calendar_month",
+                        "link": "/admin/schedule/schedule/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                ],
+            },
+            {
+                "title": "Фінанси",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Оплати",
+                        "icon": "payments",
+                        "link": "/admin/payments/payment/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                ],
+            },
+            {
+                "title": "Комунікація",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Сповіщення",
+                        "icon": "notifications",
+                        "link": "/admin/notifications/notificationlog/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                ],
+            },
+            {
+                "title": "Система",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Користувачі",
+                        "icon": "manage_accounts",
+                        "link": "/admin/accounts/user/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                    {
+                        "title": "Periodic Tasks",
+                        "icon": "schedule",
+                        "link": "/admin/django_celery_beat/periodictask/",
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
+                        "title": "Токени",
+                        "icon": "key",
+                        "link": "/admin/authtoken/tokenproxy/",
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                ],
+            },
+        ],
+    },
 }
 
 AUTH_USER_MODEL = "accounts.User"
@@ -203,4 +336,3 @@ LANGUAGES = [
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # тільки для local dev
-
