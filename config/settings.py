@@ -201,3 +201,6 @@ LANGUAGES = [
     ("en", _("English")),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
+
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # тільки для local dev
+
