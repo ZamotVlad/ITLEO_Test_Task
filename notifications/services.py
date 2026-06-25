@@ -171,3 +171,103 @@ def broadcast_to_group(group_id, message):
             skipped += 1
 
     return sent, skipped
+
+
+def send_class_reminders():
+    """Надсилає Telegram-нагадування за 2 год до заняття."""
+    import datetime
+
+    from schedule.models import Schedule
+
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    target = now + datetime.timedelta(hours=2)
+
+    entries = (
+        Schedule.objects.filter(
+            weekday=now.weekday(),
+            start_time__hour=target.hour,
+            start_time__minute__range=(target.minute - 10, target.minute + 10),
+        )
+        .select_related(
+            "group",
+            "group__teacher",
+        )
+        .prefetch_related(
+            "group__students",
+            "group__students__user",
+        )
+    )
+
+    for entry in entries:
+        text = f"Нагадування: заняття {entry.group.name} о {entry.start_time.strftime('%H:%M')}"
+        for student in entry.group.students.all():
+            if not student.user_id:
+                continue
+            chat_id = student.user.telegram_chat_id
+            if not chat_id:
+                continue
+            success = send_telegram_message(chat_id, text)
+            _log("telegram", "class_reminder", chat_id, text, "sent" if success else "failed")
+
+        if entry.group.teacher and entry.group.teacher.telegram_chat_id:
+            success = send_telegram_message(entry.group.teacher.telegram_chat_id, text)
+            _log(
+                "telegram",
+                "class_reminder",
+                entry.group.teacher.telegram_chat_id,
+                text,
+                "sent" if success else "failed",
+            )
+
+
+def notify_schedule_change(schedule_id):
+    """Сповіщає студентів і викладача про зміну розкладу."""
+    from schedule.models import Schedule
+
+    try:
+        entry = (
+            Schedule.objects.select_related(
+                "group",
+                "group__teacher",
+            )
+            .prefetch_related(
+                "group__students",
+                "group__students__user",
+                "group__students__parents",
+                "group__students__parents__user",
+            )
+            .get(pk=schedule_id)
+        )
+    except Schedule.DoesNotExist:
+        return
+
+    text = (
+        f"Зміна розкладу групи {entry.group.name}:\n"
+        f"{entry.get_weekday_display()} "
+        f"{entry.start_time.strftime('%H:%M')}–{entry.end_time.strftime('%H:%M')}"
+    )
+
+    for student in entry.group.students.all():
+        if not student.user_id:
+            continue
+        chat_id = student.user.telegram_chat_id
+        if chat_id:
+            success = send_telegram_message(chat_id, text)
+            _log("telegram", "schedule_change", chat_id, text, "sent" if success else "failed")
+        for parent in student.parents.all():
+            if not parent.user_id:
+                continue
+            parent_chat_id = parent.user.telegram_chat_id
+            if parent_chat_id:
+                send_telegram_message(parent_chat_id, text)
+                _log("telegram", "schedule_change", parent_chat_id, text, "sent")
+
+    if entry.group.teacher and entry.group.teacher.telegram_chat_id:
+        success = send_telegram_message(entry.group.teacher.telegram_chat_id, text)
+        _log(
+            "telegram",
+            "schedule_change",
+            entry.group.teacher.telegram_chat_id,
+            text,
+            "sent" if success else "failed",
+        )

@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Group(models.Model):
@@ -47,3 +49,12 @@ class Schedule(models.Model):
 
     def __str__(self):
         return f"{self.group.name} — {self.get_weekday_display()} {self.start_time}-{self.end_time}"
+
+
+@receiver(post_save, sender=Schedule)
+def on_schedule_save(sender, instance, created, **kwargs):
+    """При оновленні розкладу — сповістити учасників."""
+    if not created:
+        from notifications.tasks import send_schedule_change_notification_task
+
+        send_schedule_change_notification_task.delay(instance.id)
