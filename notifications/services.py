@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 
 from payments.models import Payment
 from students.models import Student
+
 from .models import NotificationLog
 
 
