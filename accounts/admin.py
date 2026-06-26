@@ -14,6 +14,7 @@ class CustomUserAdmin(ExportMixin, ModelAdmin, UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ("Роль і Telegram", {"fields": ("role", "telegram_chat_id")}),
     )
+    add_fieldsets = UserAdmin.add_fieldsets
 
     def has_export_permission(self, request):
         return request.user.role in OPERATIONAL_ROLES
