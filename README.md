@@ -178,21 +178,6 @@ docker-compose exec web python manage.py seed_db
 docker-compose exec web python manage.py collectstatic --noinput
 ```
 
-### 7. Вхід в адмінку
-
-Відкрий **http://localhost:8000/admin/**
-
-|        |         |
-| ------ | ------- |
-| Логін  | `admin` |
-| Пароль | `admin` |
-
-> ⚠️ Перед production-деплоєм змінити пароль:
->
-> ```bash
-> docker-compose exec web python manage.py changepassword admin
-> ```
-
 ---
 
 ## Доступні сервіси
