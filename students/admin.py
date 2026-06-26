@@ -1,3 +1,6 @@
+import secrets
+import string
+
 from django.contrib import admin, messages
 from django.core.mail import send_mail
 from django.db import transaction
@@ -8,6 +11,11 @@ from accounts.models import User
 from accounts.roles import OPERATIONAL_ROLES, Roles
 from students.models import Course, Parent, Student
 from students.services import scope_students
+
+
+def _generate_password(length=12):
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 @admin.action(description="Створити логін і надіслати запрошення на email")
@@ -25,9 +33,9 @@ def create_login_action(modeladmin, request, queryset):
             continue
 
         role = Roles.PARENT if isinstance(obj, Parent) else Roles.STUDENT
+        password = _generate_password()
 
         with transaction.atomic():
-            password = User.objects.make_random_password(length=12)
             user = User.objects.create_user(
                 username=email,
                 email=email,
