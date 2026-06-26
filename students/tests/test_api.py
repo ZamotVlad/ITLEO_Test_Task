@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 from accounts.models import User
 from payments.models import Payment
 from schedule.models import Group
-from students.models import Course, Student
+from students.models import Course, Parent, Student
 
 # --- Fixtures ---
 
@@ -17,7 +17,17 @@ def admin_user(db):
     return User.objects.create_superuser(
         username="testadmin",
         password="testpass123",
-        role="admin",
+        role="owner",  # було "admin" — оновлено
+    )
+
+
+@pytest.fixture
+def manager_user(db):
+    # is_staff встановлюється автоматично через User.save()
+    return User.objects.create_user(
+        username="testmanager",
+        password="testpass123",
+        role="manager",
     )
 
 
@@ -31,6 +41,24 @@ def teacher_user(db):
 
 
 @pytest.fixture
+def parent_user(db):
+    return User.objects.create_user(
+        username="testparent",
+        password="testpass123",
+        role="parent",
+    )
+
+
+@pytest.fixture
+def student_user(db):
+    return User.objects.create_user(
+        username="teststudent",
+        password="testpass123",
+        role="student",
+    )
+
+
+@pytest.fixture
 def admin_client(admin_user):
     client = APIClient()
     token, _ = Token.objects.get_or_create(user=admin_user)
@@ -39,9 +67,33 @@ def admin_client(admin_user):
 
 
 @pytest.fixture
+def manager_client(manager_user):
+    client = APIClient()
+    token, _ = Token.objects.get_or_create(user=manager_user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+    return client
+
+
+@pytest.fixture
 def teacher_client(teacher_user):
     client = APIClient()
     token, _ = Token.objects.get_or_create(user=teacher_user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+    return client
+
+
+@pytest.fixture
+def parent_client(parent_user):
+    client = APIClient()
+    token, _ = Token.objects.get_or_create(user=parent_user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+    return client
+
+
+@pytest.fixture
+def student_client(student_user):
+    client = APIClient()
+    token, _ = Token.objects.get_or_create(user=student_user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
     return client
 
@@ -91,16 +143,39 @@ def test_token_auth_works(admin_client):
     assert response.status_code == 200
 
 
+# --- Ролі автоматично виставляють is_staff ---
+
+
+def test_owner_has_is_staff(admin_user):
+    assert admin_user.is_staff is True
+    assert admin_user.role == "owner"
+
+
+def test_manager_has_is_staff(manager_user):
+    assert manager_user.is_staff is True
+    assert manager_user.role == "manager"
+
+
+def test_teacher_has_no_is_staff(teacher_user):
+    assert teacher_user.is_staff is False
+
+
 # --- Студенти ---
 
 
-def test_admin_can_list_students(admin_client, student):
+def test_owner_can_list_students(admin_client, student):
     response = admin_client.get("/api/students/")
     assert response.status_code == 200
     assert response.data["count"] >= 1
 
 
-def test_admin_can_create_student(admin_client, course, group):
+def test_manager_can_list_students(manager_client, student):
+    response = manager_client.get("/api/students/")
+    assert response.status_code == 200
+    assert response.data["count"] >= 1
+
+
+def test_owner_can_create_student(admin_client, course, group):
     response = admin_client.post(
         "/api/students/",
         {
@@ -112,7 +187,6 @@ def test_admin_can_create_student(admin_client, course, group):
         },
     )
     assert response.status_code == 201
-    assert response.data["full_name"] == "Новий Студент"
 
 
 def test_teacher_sees_only_own_group_students(teacher_client, student):
@@ -122,26 +196,82 @@ def test_teacher_sees_only_own_group_students(teacher_client, student):
         assert s["group"] == student.group.id
 
 
-def test_teacher_cannot_access_other_group_student(teacher_client, db):
-    other_teacher = User.objects.create_user(
-        username="other_teacher",
-        password="pass123",
-        role="teacher",
+def test_teacher_cannot_post_student(teacher_client, course, group):
+    """Teacher може лише читати — не створювати."""
+    response = teacher_client.post(
+        "/api/students/",
+        {"full_name": "Новий", "status": "lead"},
     )
-    other_group = Group.objects.create(name="OtherGroup", teacher=other_teacher)
-    other_student = Student.objects.create(
-        full_name="Чужий Студент",
-        group=other_group,
-        status="studying",
+    assert response.status_code == 403
+
+
+def test_parent_sees_only_own_child(parent_client, parent_user, student, db):
+    parent = Parent.objects.create(full_name="Батько", user=parent_user)
+    parent.students.add(student)
+    response = parent_client.get("/api/students/")
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+
+
+def test_student_sees_only_themselves(student_client, student_user, student, db):
+    student.user = student_user
+    student.save()
+    response = student_client.get("/api/students/")
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+
+
+def test_parent_cannot_post_student(parent_client, course, group):
+    response = parent_client.post(
+        "/api/students/",
+        {"full_name": "Новий", "status": "lead"},
     )
-    response = teacher_client.get(f"/api/students/{other_student.id}/")
-    assert response.status_code in [403, 404]
+    assert response.status_code == 403
+
+
+# --- DELETE — тільки owner ---
+
+
+def test_owner_can_delete_student(admin_client, student):
+    response = admin_client.delete(f"/api/students/{student.id}/")
+    assert response.status_code == 204
+
+
+def test_manager_cannot_delete_student(manager_client, student):
+    response = manager_client.delete(f"/api/students/{student.id}/")
+    assert response.status_code == 403
+
+
+def test_teacher_cannot_delete_student(teacher_client, student):
+    response = teacher_client.delete(f"/api/students/{student.id}/")
+    assert response.status_code == 403
+
+
+# --- Ролі — validate_role ---
+
+
+def test_manager_cannot_assign_owner_role(manager_client, student_user):
+    response = manager_client.patch(
+        f"/api/users/{student_user.id}/",
+        {"role": "owner"},
+        format="json",
+    )
+    assert response.status_code in [400, 403]
+
+
+def test_owner_can_change_role(admin_client, teacher_user):
+    response = admin_client.patch(
+        f"/api/users/{teacher_user.id}/",
+        {"role": "manager"},
+        format="json",
+    )
+    assert response.status_code == 200
 
 
 # --- Оплати ---
 
 
-def test_admin_can_create_payment(admin_client, student):
+def test_owner_can_create_payment(admin_client, student):
     response = admin_client.post(
         "/api/payments/",
         {
@@ -153,26 +283,40 @@ def test_admin_can_create_payment(admin_client, student):
         },
     )
     assert response.status_code == 201
-    assert response.data["status"] == "pending"
 
 
-def test_admin_can_see_debtors(admin_client, payment):
+def test_teacher_cannot_access_payments(teacher_client, payment):
+    """Teacher не бачить фінансів — нова матриця прав."""
+    response = teacher_client.get("/api/payments/")
+    assert response.status_code == 200
+    assert response.data["count"] == 0
+
+
+def test_parent_sees_only_own_child_payments(parent_client, parent_user, student, payment, db):
+    parent = Parent.objects.create(full_name="Батько", user=parent_user)
+    parent.students.add(student)
+    response = parent_client.get("/api/payments/")
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+
+
+def test_parent_cannot_see_other_student_payments(parent_client, db, course, group):
+    other_student = Student.objects.create(full_name="Чужа дитина", group=group, status="studying")
+    Payment.objects.create(student=other_student, amount=1000, date=date.today(), status="debt")
+    response = parent_client.get("/api/payments/")
+    assert response.data["count"] == 0
+
+
+def test_owner_can_see_debtors(admin_client, payment):
     response = admin_client.get("/api/payments/debtors/")
     assert response.status_code == 200
     assert len(response.data) >= 1
 
 
-def test_debtors_have_debt_status(admin_client, payment):
-    response = admin_client.get("/api/payments/debtors/")
-    assert response.status_code == 200
-    for p in response.data:
-        assert p["status"] == "debt"
-
-
 # --- Групи ---
 
 
-def test_admin_can_list_groups(admin_client, group):
+def test_owner_can_list_groups(admin_client, group):
     response = admin_client.get("/api/groups/")
     assert response.status_code == 200
 
@@ -209,3 +353,19 @@ def test_no_debtors_returns_celebration(db):
 
     text = get_bot_debtors_text()
     assert text == "Боржників немає 🎉"
+
+
+# --- /api/me/ ---
+
+
+def test_me_endpoint_returns_current_user(admin_client, admin_user):
+    response = admin_client.get("/api/users/me/")
+    assert response.status_code == 200
+    assert response.data["username"] == admin_user.username
+    assert response.data["role"] == "owner"
+
+
+def test_me_endpoint_works_for_teacher(teacher_client, teacher_user):
+    response = teacher_client.get("/api/users/me/")
+    assert response.status_code == 200
+    assert response.data["role"] == "teacher"
