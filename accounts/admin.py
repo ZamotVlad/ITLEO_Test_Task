@@ -16,8 +16,17 @@ class CustomUserAdmin(ExportMixin, ModelAdmin, UserAdmin):
     )
     add_fieldsets = UserAdmin.add_fieldsets
 
-    def has_export_permission(self, request):
+    def has_view_permission(self, request, obj=None):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_add_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_change_permission(self, request, obj=None):
         return request.user.role in OPERATIONAL_ROLES
 
     def has_delete_permission(self, request, obj=None):
         return request.user.role == Roles.OWNER
+
+    def has_export_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES

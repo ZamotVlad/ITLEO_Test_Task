@@ -72,6 +72,18 @@ class CourseAdmin(ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
 
+    def has_view_permission(self, request, obj=None):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_add_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.role == Roles.OWNER
+
 
 @admin.register(Student)
 class StudentAdmin(ExportMixin, ModelAdmin):
@@ -80,11 +92,20 @@ class StudentAdmin(ExportMixin, ModelAdmin):
     search_fields = ("full_name", "phone", "telegram_username", "email")
     actions = [create_login_action]
 
-    def has_export_permission(self, request):
+    def has_view_permission(self, request, obj=None):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_add_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_change_permission(self, request, obj=None):
         return request.user.role in OPERATIONAL_ROLES
 
     def has_delete_permission(self, request, obj=None):
         return request.user.role == Roles.OWNER
+
+    def has_export_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES
 
     def get_queryset(self, request):
         return scope_students(request.user)
@@ -96,8 +117,17 @@ class ParentAdmin(ExportMixin, ModelAdmin):
     search_fields = ("full_name", "phone", "email")
     actions = [create_login_action]
 
-    def has_export_permission(self, request):
+    def has_view_permission(self, request, obj=None):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_add_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES
+
+    def has_change_permission(self, request, obj=None):
         return request.user.role in OPERATIONAL_ROLES
 
     def has_delete_permission(self, request, obj=None):
         return request.user.role == Roles.OWNER
+
+    def has_export_permission(self, request):
+        return request.user.role in OPERATIONAL_ROLES
