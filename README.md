@@ -39,6 +39,7 @@ Backend для управління IT-академією: студенти, г�
 - ✅ **Нові Celery tasks** — class_reminder (кожні 30 хв), schedule_change (сигнал)
 - ✅ **API** — /api/users/, /api/parents/, /api/users/me/
 - ✅ **30 pytest тестів** — повне покриття матриці ролей
+- ✅ **Permissions в адмінці** — has_view/add/change/delete для всіх ролей
 
 ---
 
@@ -142,9 +143,8 @@ cd ITLEO_Test_Task
 
 ```bash
 cp .env.example .env
+# Заповни .env (деталі в розділі "Змінні середовища")
 ```
-
-Заповни `.env` (деталі в розділі "Змінні середовища").
 
 ### 3. Запуск
 
@@ -160,19 +160,21 @@ docker-compose up -d --build
 docker-compose exec web python manage.py migrate
 ```
 
-### 5. Створення owner-акаунта
+### 5. Наповнення даними
 
 ```bash
 docker-compose exec web python manage.py seed_db
 ```
 
-Виводить:
+Створює власників, менеджерів, викладачів, студентів і батьків з тимчасовим паролем `academy123`.
 
-```
-✅ Створено owner-акаунт: логін "admin", пароль "admin"
+### 6. Створення свого суперюзера
+
+```bash
+docker-compose exec web python manage.py createsuperuser
 ```
 
-### 6. Збір статичних файлів
+### 7. Збір статичних файлів
 
 ```bash
 docker-compose exec web python manage.py collectstatic --noinput
@@ -195,18 +197,10 @@ docker-compose exec web python manage.py collectstatic --noinput
 
 ## Вхід в систему
 
-Після `seed_db` відкрий адмін-панель: **http://localhost:8000/admin/**
+Після `createsuperuser` відкрий адмін-панель: **http://localhost:8000/admin/**
 
-|        |         |
-| ------ | ------- |
-| Логін  | `admin` |
-| Пароль | `admin` |
-
-> ⚠️ Перед production-деплоєм обов'язково змінити пароль:
->
-> ```bash
-> docker-compose exec web python manage.py changepassword admin
-> ```
+> ⚠️ Тимчасовий пароль для власників і менеджерів зі `seed_db` — `academy123`.
+> Кожен має змінити його після першого входу через адмінку.
 
 ---
 
@@ -233,7 +227,7 @@ docker-compose exec web python manage.py collectstatic --noinput
 
 ```bash
 curl -X POST http://localhost:8000/api/auth/token/ \
-  -d "username=admin&password=admin"
+  -d "username=admin&password=yourpassword"
 # {"token": "abc123..."}
 
 curl http://localhost:8000/api/students/ \
@@ -270,15 +264,46 @@ GET /api/payments/?status=debt
 
 ## Telegram-бот
 
-### Запуск
+### Налаштування бота (один раз)
+
+1. Написати [@BotFather](https://t.me/BotFather) в Telegram
+2. `/newbot` → задати назву → задати username
+3. Скопіювати токен в `.env`:
+
+```dotenv
+TELEGRAM_BOT_TOKEN=1234567890:ABC...
+```
+
+### Налаштування доступу адміна
+
+1. Написати [@userinfobot](https://t.me/userinfobot) → скопіювати свій `id`
+2. Додати в `.env`:
+
+```dotenv
+TELEGRAM_ADMIN_CHAT_IDS=123456789,987654321
+```
+
+### Запуск бота
 
 ```bash
+# В окремому терміналі
 docker-compose exec web python manage.py run_bot
 ```
 
 > ⚠️ Бот працює в режимі polling — запускати в окремому терміналі.
 
-### Команди
+### Як студент/викладач підключається
+
+```
+1. Знайти бота в Telegram за username
+2. Написати /start
+3. Бот автоматично прив'язує Telegram до акаунту по username
+4. Далі приходять нагадування автоматично
+```
+
+> ⚠️ Студент має мати заповнений `telegram_username` в адмінці перед першим `/start`.
+
+### Команди бота
 
 | Команда                         | Опис                               | Доступ |
 | ------------------------------- | ---------------------------------- | ------ |
@@ -288,16 +313,8 @@ docker-compose exec web python manage.py run_bot
 | `/group <назва>`                | Інфо про групу                     | Admin  |
 | `/remind`                       | Нагадування боржникам + CC батькам | Admin  |
 | `/broadcast <група> \| <текст>` | Розсилка групі                     | Admin  |
-| `/schedule`                     | Розклад всіх груп ⭐ новий         | Admin  |
-| `/stats`                        | Статистика академії ⭐ новий       | Admin  |
-
-### Налаштування доступу
-
-```dotenv
-TELEGRAM_ADMIN_CHAT_IDS=123456789,987654321
-```
-
-Дізнатись свій chat_id: [@userinfobot](https://t.me/userinfobot)
+| `/schedule`                     | Розклад всіх груп                  | Admin  |
+| `/stats`                        | Статистика академії                | Admin  |
 
 ---
 
@@ -305,42 +322,47 @@ TELEGRAM_ADMIN_CHAT_IDS=123456789,987654321
 
 ### Налаштування (один раз)
 
-1. Створи проєкт в [Google Cloud Console](https://console.cloud.google.com)
-2. Увімкни **Google Calendar API**
-3. OAuth consent screen → External → додай свій email як Test user
-4. Credentials → OAuth client ID → Web application
-5. Authorized redirect URI: `http://localhost:8000/integrations/google/callback/`
+1. Відкрий [console.cloud.google.com](https://console.cloud.google.com)
+2. Новий проєкт → назва `Academy`
+3. APIs & Services → Library → `Google Calendar API` → Enable
+4. Google Auth Platform → Audience:
+   - User Type: `External`
+   - Додай свій email як Test user
+5. Clients → Create OAuth client ID:
+   - Application type: `Web application`
+   - Authorized redirect URI: `http://localhost:8000/integrations/google/callback/`
 6. Скопіюй Client ID і Client Secret в `.env`
 
-### Підключення
+### Підключення (один раз після деплою)
 
 ```
 http://localhost:8000/integrations/google/connect/
 ```
 
-Авторизуйся через Google → токени збережуться автоматично.
+Авторизуйся через Google акаунт академії → токени збережуться в БД автоматично.
 
-### Синхронізація
+### Синхронізація розкладу
 
 ```bash
 # Всі групи
 http://localhost:8000/integrations/google/sync/all/
 
-# Конкретна група
+# Конкретна група (group_id з адмінки)
 http://localhost:8000/integrations/google/sync/group/1/
 ```
 
-Кожне заняття → повторювана подія (RRULE:FREQ=WEEKLY) з:
+Кожне заняття → повторювана подія (`RRULE:FREQ=WEEKLY`) з:
 
-- Attendees: всі студенти групи + викладач
+- Attendees: всі студенти групи + викладач (запрошення на їх email)
 - Google Meet посилання (автоматично)
 
 ### ⚠️ Production checklist для Google Calendar
 
-1. **`OAUTHLIB_INSECURE_TRANSPORT=1`** — тільки для localhost. В production прибрати (буде HTTPS)
-2. **OAuth consent screen** — зараз статус `Testing` (макс 100 користувачів). Перед production: Publishing status → `In production` + верифікація Google
-3. **App name** — змінити в Google Console → Branding (зараз може показувати стару назву)
-4. **Токени** — зберігаються як plain text. Для production розглянути шифрування (Stage 3+)
+1. `OAUTHLIB_INSECURE_TRANSPORT=1` — тільки для localhost. В production прибрати (буде HTTPS)
+2. OAuth consent screen — зараз статус `Testing` (макс 100 користувачів). Перед production: Publishing status → `In production` + верифікація Google
+3. App name — змінити в Google Console → Branding → `Academy`
+4. Токени — зберігаються як plain text. Для production розглянути шифрування (Stage 3+)
+5. `GOOGLE_REDIRECT_URI` — змінити на `https://admin.itleo.academy/integrations/google/callback/`
 
 ---
 
@@ -399,6 +421,7 @@ docker-compose exec web pytest students/tests/ -v
 # Django
 DJANGO_SECRET_KEY=your-very-secret-key-here
 DJANGO_DEBUG=True  # False в production
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 
 # PostgreSQL
 POSTGRES_DB=academy_db
@@ -411,10 +434,11 @@ POSTGRES_PORT=5432
 REDIS_URL=redis://redis:6379/0
 
 # Email (Gmail SMTP)
+# Потрібен App Password: Google Account → Security → App passwords
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_HOST_USER=your@gmail.com
-EMAIL_HOST_PASSWORD=abcdabcdabcdabcd  # App Password
+EMAIL_HOST_PASSWORD=abcdabcdabcdabcd
 DEFAULT_FROM_EMAIL=your@gmail.com
 
 # Telegram
@@ -425,34 +449,40 @@ TELEGRAM_ADMIN_CHAT_IDS=123456789
 GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your_client_secret
 GOOGLE_REDIRECT_URI=http://localhost:8000/integrations/google/callback/
+# В production: https://admin.itleo.academy/integrations/google/callback/
 ```
 
 ---
 
-## Деплой на сервері (Ubuntu 22.04)
+## Деплой на сервері (Ubuntu 22.04 + VPS)
 
 ```bash
-# Встановити Docker
+# 1. Встановити Docker
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 newgrp docker
 
-# Клонувати репозиторій
+# 2. Клонувати репозиторій
 git clone git@github.com:ZamotVlad/ITLEO_Test_Task.git
 cd ITLEO_Test_Task
 
-# Налаштувати змінні
+# 3. Налаштувати змінні
 cp .env.example .env
 nano .env
-# DJANGO_DEBUG=False, реальні паролі, GOOGLE_REDIRECT_URI=https://...
+# Встановити:
+# DJANGO_DEBUG=False
+# ALLOWED_HOSTS=admin.itleo.academy
+# GOOGLE_REDIRECT_URI=https://admin.itleo.academy/integrations/google/callback/
+# Реальні паролі і токени
 
-# Запуск
+# 4. Запуск
 docker-compose up -d --build
 docker-compose exec web python manage.py migrate
 docker-compose exec web python manage.py collectstatic --noinput
 docker-compose exec web python manage.py seed_db
+docker-compose exec web python manage.py createsuperuser
 
-# Бот (в окремій сесії)
+# 5. Бот (в окремій сесії)
 docker-compose exec web python manage.py run_bot
 ```
 
@@ -508,9 +538,10 @@ Academy_Backend/
 ## Відомі обмеження
 
 - **Telegram chat_id** — бот може писати лише тим, хто першим написав `/start`. Обмеження Telegram API.
-- **Token Auth** — для поточного етапу достатньо. JWT (djangorestframework-simplejwt) — наступний крок для production React-фронтенду.
+- **Token Auth** — для поточного етапу достатньо. JWT — наступний крок для production React-фронтенду.
 - **Google Calendar** — OAuth consent screen в статусі Testing (до 100 користувачів). Перед production потрібна верифікація Google.
 - **Імпорт даних** — зараз реалізовано тільки експорт. Імпорт — наступний крок після узгодження формату файлу.
+- **runserver** — зараз використовується для розробки. Перед production замінити на gunicorn.
 
 ---
 
@@ -526,9 +557,9 @@ Academy_Backend/
 ### Майбутні етапи (Stage 3+)
 
 - [ ] **Інвайт flow** — студент отримує посилання для самостійного встановлення пароля
+- [ ] **JWT автентифікація** — замість Token Auth для React frontend
 - [ ] **Роль Support/Moderator** — доступ до чатів без фінансів
 - [ ] **Самореєстрація** — батько реєструється сам через сайт/бота
 - [ ] **Чат** — real-time комунікація (Django Channels або polling)
 - [ ] **Домашні завдання** — відправка, перевірка, статус
-- [ ] **Масштабування на студентів** — ...
-- [ ] **JWT автентифікація** — замість Token Auth для React frontend (refresh tokens, expiry)
+- [ ] **Масштабування на студентів** — особисті кабінети через React frontend (розклад, домашні завдання, статус оплати)
