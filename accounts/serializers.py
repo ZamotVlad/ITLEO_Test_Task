@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from accounts.models import User
 from accounts.roles import Roles
@@ -37,3 +38,17 @@ class UserSerializer(serializers.ModelSerializer):
             )
 
         return value
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Стандартний JWT-логін, але у відповіді одразу id/username/role —
+    фронтенду не треба робити другий запит на /api/me/ одразу після логіну.
+    """
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data["id"] = self.user.id
+        data["username"] = self.user.username
+        data["role"] = self.user.role
+        return data
