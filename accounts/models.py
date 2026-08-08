@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from accounts.roles import STAFF_ROLES, Roles
 
@@ -9,11 +10,13 @@ class User(AbstractUser):
         max_length=20,
         choices=Roles.CHOICES,
         default=Roles.STUDENT,
+        verbose_name=_("Роль"),
     )
     telegram_chat_id = models.BigIntegerField(
         null=True,
         blank=True,
         db_index=True,
+        verbose_name=_("Telegram Chat ID"),
     )
 
     class Meta:

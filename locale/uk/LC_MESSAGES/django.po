@@ -1,0 +1,881 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-07 23:44+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+
+msgid "Task (registered)"
+msgstr "Завдання (зареєстроване)"
+
+msgid "Task (custom)"
+msgstr "Завдання (довільне)"
+
+msgid "Need name of task"
+msgstr "Потрібна назва завдання"
+
+msgid "Only one can be set, in expires and expire_seconds"
+msgstr "Можна вказати лише одне: expires або expire_seconds"
+
+#, python-format
+msgid "Unable to parse JSON: %s"
+msgstr "Не вдалося розпарсити JSON: %s"
+
+msgid "Schedule"
+msgstr "Розклад"
+
+msgid "Arguments"
+msgstr "Аргументи"
+
+msgid "Execution Options"
+msgstr "Параметри виконання"
+
+msgid "Enable selected tasks"
+msgstr "Увімкнути обрані завдання"
+
+#, python-brace-format
+msgid "{0} task was successfully enabled"
+msgid_plural "{0} tasks were successfully enabled"
+msgstr[0] "{0} завдання успішно увімкнено"
+msgstr[1] "{0} завдання успішно увімкнено"
+msgstr[2] "{0} завдань успішно увімкнено"
+msgstr[3] "{0} завдання успішно увімкнено"
+
+msgid "Disable selected tasks"
+msgstr "Вимкнути обрані завдання"
+
+#, python-brace-format
+msgid "{0} task was successfully disabled"
+msgid_plural "{0} tasks were successfully disabled"
+msgstr[0] "{0} завдання успішно вимкнено"
+msgstr[1] "{0} завдання успішно вимкнено"
+msgstr[2] "{0} завдань успішно вимкнено"
+msgstr[3] "{0} завдання успішно вимкнено"
+
+msgid "Toggle activity of selected tasks"
+msgstr "Перемкнути активність обраних завдань"
+
+#, python-brace-format
+msgid "{0} task was successfully toggled"
+msgid_plural "{0} tasks were successfully toggled"
+msgstr[0] "{0} завдання успішно перемкнуто"
+msgstr[1] "{0} завдання успішно перемкнуто"
+msgstr[2] "{0} завдань успішно перемкнуто"
+msgstr[3] "{0} завдання успішно перемкнуто"
+
+msgid "Run selected tasks"
+msgstr "Запустити обрані завдання"
+
+#, python-brace-format
+msgid "task \"{not_found_task_name}\" not found"
+msgstr "завдання \"{not_found_task_name}\" не знайдено"
+
+#, python-brace-format
+msgid "{0} task{1} {2} successfully run"
+msgstr "{0} завдання{1} {2} успішно запущено"
+
+msgid "was,were"
+msgstr "було,було"
+
+msgid "Periodic Tasks Using This Schedule"
+msgstr "Періодичні завдання за цим розкладом"
+
+msgid "Periodic Tasks"
+msgstr "Періодичні завдання"
+
+msgid "Days"
+msgstr "Дні"
+
+msgid "Hours"
+msgstr "Години"
+
+msgid "Minutes"
+msgstr "Хвилини"
+
+msgid "Seconds"
+msgstr "Секунди"
+
+msgid "Microseconds"
+msgstr "Мікросекунди"
+
+msgid "Day"
+msgstr "День"
+
+msgid "Hour"
+msgstr "Година"
+
+msgid "Minute"
+msgstr "Хвилина"
+
+msgid "Second"
+msgstr "Секунда"
+
+msgid "Microsecond"
+msgstr "Мікросекунда"
+
+msgid "Astronomical dawn"
+msgstr "Астрономічний світанок"
+
+msgid "Civil dawn"
+msgstr "Цивільний світанок"
+
+msgid "Nautical dawn"
+msgstr "Навігаційний світанок"
+
+msgid "Astronomical dusk"
+msgstr "Астрономічні сутінки"
+
+msgid "Civil dusk"
+msgstr "Цивільні сутінки"
+
+msgid "Nautical dusk"
+msgstr "Навігаційні сутінки"
+
+msgid "Solar noon"
+msgstr "Сонячний полудень"
+
+msgid "Sunrise"
+msgstr "Схід сонця"
+
+msgid "Sunset"
+msgstr "Захід сонця"
+
+msgid "Solar Event"
+msgstr "Сонячна подія"
+
+msgid "The type of solar event when the job should run"
+msgstr "Тип сонячної події, коли має запускатись завдання"
+
+msgid "Latitude"
+msgstr "Широта"
+
+msgid "Run the task when the event happens at this latitude"
+msgstr "Запускати завдання, коли подія відбувається на цій широті"
+
+msgid "Longitude"
+msgstr "Довгота"
+
+msgid "Run the task when the event happens at this longitude"
+msgstr "Запускати завдання, коли подія відбувається на цій довготі"
+
+msgid "solar event"
+msgstr "сонячна подія"
+
+msgid "solar events"
+msgstr "сонячні події"
+
+msgid "Number of Periods"
+msgstr "Кількість періодів"
+
+msgid "Number of interval periods to wait before running the task again"
+msgstr "Кількість інтервалів очікування перед повторним запуском завдання"
+
+msgid "Interval Period"
+msgstr "Тип інтервалу"
+
+msgid "The type of period between task runs (Example: days)"
+msgstr "Тип періоду між запусками завдання (наприклад: дні)"
+
+msgid "interval"
+msgstr "інтервал"
+
+msgid "intervals"
+msgstr "інтервали"
+
+msgid "every {}"
+msgstr "кожні {}"
+
+msgid "every {} {}"
+msgstr "кожні {} {}"
+
+msgid "Clock Time"
+msgstr "Час запуску"
+
+msgid "Run the task at clocked time"
+msgstr "Запустити завдання у вказаний час"
+
+msgid "clocked"
+msgstr "за часом"
+
+msgid "Minute(s)"
+msgstr "Хвилина(и)"
+
+msgid "Cron Minutes to Run. Use \"*\" for \"all\". (Example: \"0,30\")"
+msgstr "Хвилини для Cron. Використовуйте \"*\" для \"усіх\". (Наприклад: \"0,30\")"
+
+msgid "Hour(s)"
+msgstr "Година(и)"
+
+msgid "Cron Hours to Run. Use \"*\" for \"all\". (Example: \"8,20\")"
+msgstr "Години для Cron. Використовуйте \"*\" для \"усіх\". (Наприклад: \"8,20\")"
+
+msgid "Day(s) Of The Month"
+msgstr "День(і) місяця"
+
+msgid "Cron Days Of The Month to Run. Use \"*\" for \"all\". (Example: \"1,15\")"
+msgstr "Дні місяця для Cron. Використовуйте \"*\" для \"усіх\". (Наприклад: \"1,15\")"
+
+msgid "Month(s) Of The Year"
+msgstr "Місяць(і) року"
+
+msgid "Cron Months (1-12) Of The Year to Run. Use \"*\" for \"all\". (Example: \"1,12\")"
+msgstr ""
+"Місяці (1-12) року для Cron. Використовуйте \"*\" для \"усіх\". (Наприклад: "
+"\"1,12\")"
+
+msgid "Day(s) Of The Week"
+msgstr "День(і) тижня"
+
+msgid ""
+"Cron Days Of The Week to Run. Use \"*\" for \"all\", Sunday is 0 or 7, "
+"Monday is 1. (Example: \"0,5\")"
+msgstr ""
+"Дні тижня для Cron. Використовуйте \"*\" для \"усіх\", неділя — 0 або 7, "
+"понеділок — 1. (Наприклад: \"0,5\")"
+
+msgid "Cron Timezone"
+msgstr "Часовий пояс Cron"
+
+msgid "Timezone to Run the Cron Schedule on. Default is UTC."
+msgstr "Часовий пояс для розкладу Cron. За замовчуванням UTC."
+
+msgid "crontab"
+msgstr "crontab-розклад"
+
+msgid "crontabs"
+msgstr "crontab-розклади"
+
+msgid "periodic task track"
+msgstr "запис виконання завдання"
+
+msgid "periodic task tracks"
+msgstr "записи виконання завдань"
+
+msgid "Name"
+msgstr "Назва"
+
+msgid "Short Description For This Task"
+msgstr "Короткий опис цього завдання"
+
+msgid ""
+"The Name of the Celery Task that Should be Run.  (Example: "
+"\"proj.tasks.import_contacts\")"
+msgstr ""
+"Назва Celery-завдання, яке потрібно виконати. (Наприклад: "
+"\"proj.tasks.import_contacts\")"
+
+msgid "Interval Schedule"
+msgstr "Розклад за інтервалом"
+
+msgid ""
+"Interval Schedule to run the task on.  Set only one schedule type, leave the"
+" others null."
+msgstr ""
+"Розклад за інтервалом для запуску завдання. Вкажіть лише один тип розкладу, "
+"інші залиште порожніми."
+
+msgid "Crontab Schedule"
+msgstr "Розклад Crontab"
+
+msgid ""
+"Crontab Schedule to run the task on.  Set only one schedule type, leave the "
+"others null."
+msgstr ""
+"Розклад Crontab для запуску завдання. Вкажіть лише один тип розкладу, інші "
+"залиште порожніми."
+
+msgid "Solar Schedule"
+msgstr "Сонячний розклад"
+
+msgid ""
+"Solar Schedule to run the task on.  Set only one schedule type, leave the "
+"others null."
+msgstr ""
+"Сонячний розклад для запуску завдання. Вкажіть лише один тип розкладу, інші "
+"залиште порожніми."
+
+msgid "Clocked Schedule"
+msgstr "Розклад за часом"
+
+msgid ""
+"Clocked Schedule to run the task on.  Set only one schedule type, leave the "
+"others null."
+msgstr ""
+"Розклад за часом для запуску завдання. Вкажіть лише один тип розкладу, інші "
+"залиште порожніми."
+
+msgid "Positional Arguments"
+msgstr "Позиційні аргументи"
+
+msgid "JSON encoded positional arguments (Example: [\"arg1\", \"arg2\"])"
+msgstr "Позиційні аргументи у форматі JSON (наприклад: [\"arg1\", \"arg2\"])"
+
+msgid "Keyword Arguments"
+msgstr "Іменовані аргументи"
+
+msgid "JSON encoded keyword arguments (Example: {\"argument\": \"value\"})"
+msgstr "Іменовані аргументи у форматі JSON (наприклад: {\"argument\": \"value\"})"
+
+msgid "Queue Override"
+msgstr "Перевизначена черга"
+
+msgid "Queue defined in CELERY_TASK_QUEUES. Leave None for default queuing."
+msgstr ""
+"Черга, визначена в CELERY_TASK_QUEUES. Залиште порожнім для черги за "
+"замовчуванням."
+
+msgid "Exchange"
+msgstr "Exchange"
+
+msgid "Override Exchange for low-level AMQP routing"
+msgstr "Перевизначення Exchange для низькорівневої маршрутизації AMQP"
+
+msgid "Routing Key"
+msgstr "Routing Key"
+
+msgid "Override Routing Key for low-level AMQP routing"
+msgstr "Перевизначення Routing Key для низькорівневої маршрутизації AMQP"
+
+msgid "AMQP Message Headers"
+msgstr "Заголовки повідомлення AMQP"
+
+msgid "JSON encoded message headers for the AMQP message."
+msgstr "Заголовки повідомлення AMQP у форматі JSON."
+
+msgid "Priority"
+msgstr "Пріоритет"
+
+msgid ""
+"Priority Number between 0 and 255. Supported by: RabbitMQ, Redis (priority "
+"reversed, 0 is highest)."
+msgstr ""
+"Число пріоритету від 0 до 255. Підтримується: RabbitMQ, Redis (пріоритет "
+"зворотний, 0 — найвищий)."
+
+msgid "Expires Datetime"
+msgstr "Дата й час завершення дії"
+
+msgid ""
+"Datetime after which the schedule will no longer trigger the task to run"
+msgstr "Дата й час, після якого розклад більше не запускатиме завдання"
+
+msgid "Expires timedelta with seconds"
+msgstr "Час дії у секундах"
+
+msgid ""
+"Timedelta with seconds which the schedule will no longer trigger the task to"
+" run"
+msgstr ""
+"Проміжок часу в секундах, після якого розклад більше не запускатиме завдання"
+
+msgid "One-off Task"
+msgstr "Одноразове завдання"
+
+msgid "If True, the schedule will only run the task a single time"
+msgstr "Якщо увімкнено, розклад запустить завдання лише один раз"
+
+msgid "Start Datetime"
+msgstr "Дата й час початку"
+
+msgid "Datetime when the schedule should begin triggering the task to run"
+msgstr "Дата й час, коли розклад має почати запускати завдання"
+
+msgid "Enabled"
+msgstr "Увімкнено"
+
+msgid "Set to False to disable the schedule"
+msgstr "Вимкніть, щоб зупинити розклад"
+
+msgid "Last Run Datetime"
+msgstr "Дата й час останнього запуску"
+
+msgid ""
+"Datetime that the schedule last triggered the task to run. Reset to None if "
+"enabled is set to False."
+msgstr ""
+"Дата й час останнього запуску завдання за розкладом. Скидається, якщо "
+"\"Увімкнено\" вимкнено."
+
+msgid "Total Run Count"
+msgstr "Загальна кількість запусків"
+
+msgid "Running count of how many times the schedule has triggered the task"
+msgstr "Лічильник того, скільки разів розклад запускав завдання"
+
+msgid "Last Modified"
+msgstr "Востаннє змінено"
+
+msgid "Datetime that this PeriodicTask was last modified"
+msgstr "Дата й час останньої зміни цього завдання"
+
+msgid "Description"
+msgstr "Опис"
+
+msgid "Detailed description about the details of this Periodic Task"
+msgstr "Детальний опис цього періодичного завдання"
+
+msgid "periodic task"
+msgstr "періодичне завдання"
+
+msgid "periodic tasks"
+msgstr "періодичні завдання"
+
+msgid "Home"
+msgstr "Головна"
+
+msgid "Run the selected action"
+msgstr "Виконати обрану дію"
+
+msgid "Run"
+msgstr "Виконати"
+
+msgid "Click here to select the objects across all pages"
+msgstr "Натисніть, щоб обрати об’єкти на всіх сторінках"
+
+#, python-format
+msgid "Select all %(total_count)s %(module_name)s"
+msgstr "Обрати всі %(total_count)s (%(module_name)s)"
+
+msgid "Clear selection"
+msgstr "Скасувати вибір"
+
+msgid "Django site admin"
+msgstr "Адміністрування сайту Django"
+
+#, python-format
+msgid "Models in the %(name)s application"
+msgstr "Моделі застосунку %(name)s"
+
+msgid "You don’t have permission to view or edit anything."
+msgstr "У вас немає прав переглядати чи редагувати будь-що."
+
+msgid "After you've created a user, you’ll be able to edit more user options."
+msgstr ""
+"Після створення користувача ви зможете редагувати додаткові параметри."
+
+#, python-format
+msgid "Enter a new password for the user <strong>%(username)s</strong>."
+msgstr "Введіть новий пароль для користувача <strong>%(username)s</strong>."
+
+msgid "Change password"
+msgstr "Змінити пароль"
+
+msgid "History"
+msgstr "Історія"
+
+msgid "View on site"
+msgstr "Переглянути на сайті"
+
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would result in deleting "
+"related objects, but your account doesn't have permission to delete the "
+"following types of objects:"
+msgstr ""
+"Видалення %(object_name)s «%(escaped_object)s» призведе до видалення "
+"пов’язаних об’єктів, але у вашого акаунта немає прав видаляти такі типи "
+"об’єктів:"
+
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the"
+" following protected related objects:"
+msgstr ""
+"Видалення %(object_name)s «%(escaped_object)s» вимагатиме видалення таких "
+"захищених пов’язаних об’єктів:"
+
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? "
+"All of the following related items will be deleted:"
+msgstr ""
+"Ви впевнені, що хочете видалити %(object_name)s «%(escaped_object)s»? Усі "
+"пов’язані елементи нижче також будуть видалені:"
+
+msgid "Objects"
+msgstr "Об’єкти"
+
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would result in deleting related "
+"objects, but your account doesn't have permission to delete the following "
+"types of objects:"
+msgstr ""
+"Видалення обраних %(objects_name)s призведе до видалення пов’язаних "
+"об’єктів, але у вашого акаунта немає прав видаляти такі типи об’єктів:"
+
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would require deleting the following "
+"protected related objects:"
+msgstr ""
+"Видалення обраних %(objects_name)s вимагатиме видалення таких захищених "
+"пов’язаних об’єктів:"
+
+#, python-format
+msgid ""
+"Are you sure you want to delete the selected %(objects_name)s? All of the "
+"following objects and their related items will be deleted:"
+msgstr ""
+"Ви впевнені, що хочете видалити обрані %(objects_name)s? Усі об’єкти нижче "
+"та пов’язані елементи також будуть видалені:"
+
+#, python-format
+msgid " By %(filter_title)s "
+msgstr " За %(filter_title)s "
+
+msgid "Summary"
+msgstr "Підсумок"
+
+msgid "Welcome back to"
+msgstr "Раді знову бачити вас у"
+
+#, python-format
+msgid ""
+"You are authenticated as %(username)s, but are not authorized to access this"
+" page. Would you like to login to a different account?"
+msgstr ""
+"Ви увійшли як %(username)s, але не маєте прав доступу до цієї сторінки. "
+"Увійти під іншим акаунтом?"
+
+msgid "Log in"
+msgstr "Увійти"
+
+msgid "Forgotten your password or username?"
+msgstr "Забули пароль або логін?"
+
+msgid "Date/time"
+msgstr "Дата/час"
+
+msgid "User"
+msgstr "Користувач"
+
+msgid "Action"
+msgstr "Дія"
+
+msgid "entry"
+msgid_plural "entries"
+msgstr[0] "запис"
+msgstr[1] "записи"
+msgstr[2] "записів"
+msgstr[3] "запису"
+
+msgid ""
+"This object doesn’t have a change history. It probably wasn’t added via this"
+" admin site."
+msgstr ""
+"Цей об’єкт не має історії змін. Ймовірно, його не було додано через цю "
+"адмін-панель."
+
+msgid "Show all"
+msgstr "Показати всі"
+
+msgid "Save"
+msgstr "Зберегти"
+
+msgid "Type to search"
+msgstr "Введіть текст для пошуку"
+
+msgid "Save and continue editing"
+msgstr "Зберегти і продовжити редагування"
+
+msgid "Save and view"
+msgstr "Зберегти і переглянути"
+
+msgid "Save and add another"
+msgstr "Зберегти і додати ще один"
+
+msgid "Save as new"
+msgstr "Зберегти як новий"
+
+msgid "Close"
+msgstr "Закрити"
+
+msgid "Delete"
+msgstr "Видалити"
+
+msgid "You have been successfully logged out from the administration"
+msgstr "Ви успішно вийшли з адмін-панелі"
+
+msgid "Thanks for spending some quality time with the web site today."
+msgstr "Дякуємо за час, проведений на сайті сьогодні."
+
+msgid "Log in again"
+msgstr "Увійти знову"
+
+msgid "Your password was changed."
+msgstr "Ваш пароль змінено."
+
+msgid ""
+"Please enter your old password, for security’s sake, and then enter your new"
+" password twice so we can verify you typed it in correctly."
+msgstr ""
+"Будь ласка, введіть свій старий пароль, а потім двічі новий, щоб ми могли "
+"перевірити, що ви ввели його правильно."
+
+msgid "No data"
+msgstr "Немає даних"
+
+msgid "View site"
+msgstr "Переглянути сайт"
+
+msgid "Log out"
+msgstr "Вийти"
+
+#, python-format
+msgid "Add %(name)s"
+msgstr "Додати «%(name)s»"
+
+msgid "All applications"
+msgstr "Усі застосунки"
+
+msgid "Add"
+msgstr "Додати"
+
+msgid "View"
+msgstr "Перегляд"
+
+msgid "Change"
+msgstr "Змінити"
+
+msgid "Unknown"
+msgstr "Невідомо"
+
+msgid "True"
+msgstr "Так"
+
+msgid "False"
+msgstr "Ні"
+
+msgid "Apply Filters"
+msgstr "Застосувати фільтри"
+
+msgid "Hide counts"
+msgstr "Приховати лічильники"
+
+msgid "Show counts"
+msgstr "Показати лічильники"
+
+msgid "Clear all filters"
+msgstr "Скинути всі фільтри"
+
+msgid "Filters"
+msgstr "Фільтри"
+
+msgid "Toggle sorting"
+msgstr "Перемкнути сортування"
+
+msgid "Remove from sorting"
+msgstr "Прибрати із сортування"
+
+#, python-format
+msgid "Sorting priority: %(priority_number)s"
+msgstr "Пріоритет сортування: %(priority_number)s"
+
+msgid "Navigate"
+msgstr "Навігація"
+
+msgid "Select"
+msgstr "Обрати"
+
+msgid "Clear"
+msgstr "Очистити"
+
+msgid "Recent searches"
+msgstr "Останні пошуки"
+
+msgid "Nothing matched your search"
+msgstr "За вашим запитом нічого не знайдено"
+
+#, python-format
+msgid ""
+"\n"
+"            Found <span class=\"font-medium text-important\">%(counter)s</span> result in %(time)s seconds\n"
+"        "
+msgid_plural ""
+"\n"
+"            Found <span class=\"font-medium text-important\">%(counter)s</span> results in %(time)s seconds\n"
+"        "
+msgstr[0] ""
+"\n"
+"            Знайдено <span class=\"font-medium text-important\">%(counter)s</span> результат за %(time)s секунд\n"
+"        "
+msgstr[1] ""
+"\n"
+"            Знайдено <span class=\"font-medium text-important\">%(counter)s</span> результати за %(time)s секунд\n"
+"        "
+msgstr[2] ""
+"\n"
+"            Знайдено <span class=\"font-medium text-important\">%(counter)s</span> результатів за %(time)s секунд\n"
+"        "
+msgstr[3] ""
+"\n"
+"            Знайдено <span class=\"font-medium text-important\">%(counter)s</span> результату за %(time)s секунд\n"
+"        "
+
+msgid "No, take me back"
+msgstr "Ні, повернутись назад"
+
+msgid "Yes, I’m sure"
+msgstr "Так, я впевнений(а)"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "Submit"
+msgstr "Надіслати"
+
+msgid "Record picture"
+msgstr "Зробити фото"
+
+msgid "This item will be deleted."
+msgstr "Цей елемент буде видалено."
+
+msgid "Click to cancel"
+msgstr "Натисніть, щоб скасувати"
+
+msgid "No results found"
+msgstr "Нічого не знайдено"
+
+msgid ""
+"This page yielded into no results. Create a new item or reset your filters."
+msgstr ""
+"За цим запитом нічого не знайдено. Створіть новий запис або скиньте фільтри."
+
+msgid "Reset filters"
+msgstr "Скинути фільтри"
+
+msgid "Image preview"
+msgstr "Попередній перегляд зображення"
+
+msgid "Click to download"
+msgstr "Натисніть, щоб завантажити"
+
+msgid "Go back"
+msgstr "Назад"
+
+msgid "Recent actions"
+msgstr "Останні дії"
+
+msgid "Unknown content"
+msgstr "Невідомий вміст"
+
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] "Будь ласка, виправте помилку нижче."
+msgstr[1] "Будь ласка, виправте помилки нижче."
+msgstr[2] "Будь ласка, виправте помилки нижче."
+msgstr[3] "Будь ласка, виправте помилки нижче."
+
+msgid "Previous"
+msgstr "Попередня"
+
+msgid "Next"
+msgstr "Наступна"
+
+msgid "Search apps and models..."
+msgstr "Пошук застосунків і моделей..."
+
+msgid "Available shortcuts"
+msgstr "Доступні гарячі клавіші"
+
+msgid "Global shortcuts"
+msgstr "Глобальні гарячі клавіші"
+
+msgid "Open command tool"
+msgstr "Відкрити командну панель"
+
+msgid "Open shortcuts list"
+msgstr "Показати список гарячих клавіш"
+
+msgid "Toggle sidebar"
+msgstr "Перемкнути бічну панель"
+
+msgid "Toggle dark/light mode"
+msgstr "Перемкнути темну/світлу тему"
+
+msgid "Changelist shortcuts"
+msgstr "Гарячі клавіші списку"
+
+msgid "Toggle filter"
+msgstr "Перемкнути фільтр"
+
+msgid "Create new record"
+msgstr "Створити новий запис"
+
+msgid "Command tool shortcuts"
+msgstr "Гарячі клавіші командної панелі"
+
+msgid "Open selection"
+msgstr "Відкрити обране"
+
+msgid "Open selection in new tab"
+msgstr "Відкрити обране в новій вкладці"
+
+msgid "Django administration"
+msgstr "Адміністрування Django"
+
+msgid "General"
+msgstr "Загальне"
+
+msgid "Light"
+msgstr "Світла"
+
+msgid "Dark"
+msgstr "Темна"
+
+msgid "System"
+msgstr "Системна"
+
+msgid "Return to site"
+msgstr "Повернутись на сайт"
+
+#, python-format
+msgid "%(counter)s result"
+msgid_plural "%(counter)s results"
+msgstr[0] "%(counter)s результат"
+msgstr[1] "%(counter)s результати"
+msgstr[2] "%(counter)s результатів"
+msgstr[3] "%(counter)s результату"
+
+#, python-format
+msgid "%(full_result_count)s total"
+msgstr "усього %(full_result_count)s"
+
+msgid "Choose file to upload"
+msgstr "Оберіть файл для завантаження"
+
+msgid "Toggle password visibility"
+msgstr "Показати/приховати пароль"
+
+#, python-format
+msgid "Change selected %(model)s"
+msgstr "Змінити обране: %(model)s"
+
+#, python-format
+msgid "Add another %(model)s"
+msgstr "Додати ще: %(model)s"
+
+#, python-format
+msgid "View selected %(model)s"
+msgstr "Переглянути обране: %(model)s"
+
+#, python-format
+msgid "Delete selected %(model)s"
+msgstr "Видалити обране: %(model)s"
+
+msgid "Add row"
+msgstr "Додати рядок"

@@ -2,10 +2,11 @@ from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name=_("Назва"))
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -13,6 +14,7 @@ class Group(models.Model):
         blank=True,
         related_name="teaching_groups",
         limit_choices_to={"role": "teacher"},
+        verbose_name=_("Викладач"),
     )
 
     class Meta:
@@ -35,11 +37,15 @@ class Schedule(models.Model):
         (6, "Неділя"),
     ]
 
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="schedule_entries")
-    weekday = models.IntegerField(choices=WEEKDAY_CHOICES)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    google_event_id = models.CharField(max_length=255, blank=True)
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, related_name="schedule_entries", verbose_name=_("Група")
+    )
+    weekday = models.IntegerField(choices=WEEKDAY_CHOICES, verbose_name=_("День тижня"))
+    start_time = models.TimeField(verbose_name=_("Початок"))
+    end_time = models.TimeField(verbose_name=_("Кінець"))
+    google_event_id = models.CharField(
+        max_length=255, blank=True, verbose_name=_("ID події Google")
+    )
 
     class Meta:
         verbose_name = "Розклад"
