@@ -1,10 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from dashboard.models import SoftDeleteModel
 from students.models import Student
 
 
-class Payment(models.Model):
+class Payment(SoftDeleteModel):
     STATUS_CHOICES = [
         ("paid", "Оплачено"),
         ("pending", "Очікується"),

@@ -12,6 +12,9 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [RoleBasedPermission]
 
+    def perform_destroy(self, instance):
+        instance.soft_delete(user=self.request.user)
+
 
 class StudentViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
@@ -21,6 +24,9 @@ class StudentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return scope_students(self.request.user)
+
+    def perform_destroy(self, instance):
+        instance.soft_delete(user=self.request.user)
 
 
 class ParentViewSet(viewsets.ModelViewSet):
@@ -38,3 +44,6 @@ class ParentViewSet(viewsets.ModelViewSet):
         if self.request.user.role == Roles.PARENT:
             return qs.filter(user=self.request.user)
         return qs.none()
+
+    def perform_destroy(self, instance):
+        instance.soft_delete(user=self.request.user)

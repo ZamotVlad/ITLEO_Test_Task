@@ -13,6 +13,9 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return scope_groups(self.request.user)
 
+    def perform_destroy(self, instance):
+        instance.soft_delete(user=self.request.user)
+
 
 class ScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = ScheduleSerializer
@@ -20,3 +23,6 @@ class ScheduleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return scope_schedule(self.request.user)
+
+    def perform_destroy(self, instance):
+        instance.soft_delete(user=self.request.user)

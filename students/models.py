@@ -2,8 +2,10 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from dashboard.models import SoftDeleteModel
 
-class Course(models.Model):
+
+class Course(SoftDeleteModel):
     name = models.CharField(max_length=100, verbose_name=_("Назва"))
 
     class Meta:
@@ -14,7 +16,7 @@ class Course(models.Model):
         return self.name
 
 
-class Student(models.Model):
+class Student(SoftDeleteModel):
     STATUS_CHOICES = [
         ("lead", "Лід"),
         ("studying", "Навчається"),
@@ -75,7 +77,7 @@ class Student(models.Model):
         return self.user.telegram_chat_id if self.user_id else None
 
 
-class Parent(models.Model):
+class Parent(SoftDeleteModel):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

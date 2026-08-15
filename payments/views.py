@@ -15,6 +15,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return scope_payments(self.request.user)
 
+    def perform_destroy(self, instance):
+        instance.soft_delete(user=self.request.user)
+
     @action(detail=False, methods=["get"])
     def debtors(self, request):
         qs = get_debtors(request.user)

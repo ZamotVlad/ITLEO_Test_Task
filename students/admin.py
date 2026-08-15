@@ -95,6 +95,13 @@ class CourseAdmin(ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return request.user.role == Roles.OWNER
 
+    def delete_model(self, request, obj):
+        obj.soft_delete(user=request.user)
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.soft_delete(user=request.user)
+
 
 @admin.register(Student)
 class StudentAdmin(ExportMixin, ModelAdmin):
@@ -122,6 +129,13 @@ class StudentAdmin(ExportMixin, ModelAdmin):
     def get_queryset(self, request):
         return scope_students(request.user)
 
+    def delete_model(self, request, obj):
+        obj.soft_delete(user=request.user)
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.soft_delete(user=request.user)
+
 
 @admin.register(Parent)
 class ParentAdmin(ExportMixin, ModelAdmin):
@@ -144,3 +158,10 @@ class ParentAdmin(ExportMixin, ModelAdmin):
 
     def has_export_permission(self, request):
         return request.user.role in OPERATIONAL_ROLES
+
+    def delete_model(self, request, obj):
+        obj.soft_delete(user=request.user)
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.soft_delete(user=request.user)

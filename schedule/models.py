@@ -4,8 +4,10 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
+from dashboard.models import SoftDeleteModel
 
-class Group(models.Model):
+
+class Group(SoftDeleteModel):
     name = models.CharField(max_length=100, verbose_name=_("Назва"))
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -26,7 +28,7 @@ class Group(models.Model):
         return self.name
 
 
-class Schedule(models.Model):
+class Schedule(SoftDeleteModel):
     WEEKDAY_CHOICES = [
         (0, "Понеділок"),
         (1, "Вівторок"),

@@ -29,3 +29,10 @@ class PaymentAdmin(ModelAdmin):
         if request.user.role == "teacher":
             return qs.filter(student__group__teacher=request.user)
         return qs
+
+    def delete_model(self, request, obj):
+        obj.soft_delete(user=request.user)
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.soft_delete(user=request.user)
