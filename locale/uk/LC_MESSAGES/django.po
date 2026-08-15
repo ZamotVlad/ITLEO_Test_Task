@@ -838,7 +838,7 @@ msgid "Dark"
 msgstr "Темна"
 
 msgid "System"
-msgstr "Системна"
+msgstr "Авто"
 
 msgid "Return to site"
 msgstr "Повернутись на сайт"
