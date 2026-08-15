@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from students.models import Student
 
@@ -10,11 +11,15 @@ class Payment(models.Model):
         ("debt", "Борг"),
     ]
 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="payments")
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
-    comment = models.TextField(blank=True)
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name="payments", verbose_name=_("Студент")
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Сума"))
+    date = models.DateField(verbose_name=_("Дата"))
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="pending", verbose_name=_("Статус")
+    )
+    comment = models.TextField(blank=True, verbose_name=_("Коментар"))
 
     class Meta:
         verbose_name = "Оплата"

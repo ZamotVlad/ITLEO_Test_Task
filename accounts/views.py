@@ -2,10 +2,11 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from accounts.models import User
 from accounts.roles import OPERATIONAL_ROLES
-from accounts.serializers import UserSerializer
+from accounts.serializers import CustomTokenObtainPairSerializer, UserSerializer
 from students.permissions import RoleBasedPermission
 
 
@@ -26,3 +27,7 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

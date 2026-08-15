@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
+from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 
@@ -150,12 +152,20 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Admin site customization
 UNFOLD = {
     "SITE_TITLE": "Academy Admin",
     "SITE_HEADER": "Academy",
     "SITE_URL": "/",
+    "SITE_FAVICONS": [
+        {
+            "href": lambda request: static("favicon.svg"),
+            "rel": "icon",
+            "type": "image/svg+xml",
+        },
+    ],
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": False,
     "DASHBOARD_CALLBACK": "dashboard.views.dashboard_callback",
@@ -223,7 +233,7 @@ UNFOLD = {
                 ],
             },
             {
-                "title": "Розклад",
+                "title": "Навчальні процеси",
                 "separator": True,
                 "items": [
                     {
@@ -253,11 +263,11 @@ UNFOLD = {
                 ],
             },
             {
-                "title": "Комунікація",
+                "title": "Сповіщення",
                 "separator": True,
                 "items": [
                     {
-                        "title": "Сповіщення",
+                        "title": "Логи сповіщень",
                         "icon": "notifications",
                         "link": "/admin/notifications/notificationlog/",
                         "permission": lambda request: request.user.is_staff,
@@ -265,7 +275,7 @@ UNFOLD = {
                 ],
             },
             {
-                "title": "Система",
+                "title": "Акаунти",
                 "separator": True,
                 "items": [
                     {
@@ -274,12 +284,24 @@ UNFOLD = {
                         "link": "/admin/accounts/user/",
                         "permission": lambda request: request.user.is_staff,
                     },
+                ],
+            },
+            {
+                "title": "Автоматизація",
+                "separator": True,
+                "items": [
                     {
-                        "title": "Periodic Tasks",
+                        "title": "Періодичні завдання",
                         "icon": "schedule",
                         "link": "/admin/django_celery_beat/periodictask/",
                         "permission": lambda request: request.user.is_superuser,
                     },
+                ],
+            },
+            {
+                "title": "Авторизація",
+                "separator": True,
+                "items": [
                     {
                         "title": "Токени",
                         "icon": "key",
@@ -296,6 +318,7 @@ AUTH_USER_MODEL = "accounts.User"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
@@ -307,13 +330,20 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Academy API",
     "VERSION": "1.0.0",
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+CORS_ALLOW_CREDENTIALS = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -334,7 +364,6 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
 LANGUAGES = [
     ("uk", _("Українська")),
-    ("en", _("English")),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 

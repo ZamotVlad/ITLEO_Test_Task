@@ -369,3 +369,32 @@ def test_me_endpoint_works_for_teacher(teacher_client, teacher_user):
     response = teacher_client.get("/api/users/me/")
     assert response.status_code == 200
     assert response.data["role"] == "teacher"
+
+
+def test_jwt_auth_respects_role_based_permission(teacher_client, teacher_user, student):
+    """
+    Перевірка ризику, який згадав Лео: RoleBasedPermission і scope_*
+    мають однаково коректно працювати незалежно від того, чи це Token, чи JWT.
+    """
+    from rest_framework.test import APIClient
+
+    jwt_client = APIClient()
+    response = jwt_client.post(
+        "/api/auth/jwt/create/",
+        {"username": teacher_user.username, "password": "testpass123"},
+    )
+    assert response.status_code == 200
+    assert response.data["role"] == "teacher"
+
+    access_token = response.data["access"]
+    jwt_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    # Той самий scope_students, що і в Token-варіанті — має віддати тільки свою групу
+    response = jwt_client.get("/api/students/")
+    assert response.status_code == 200
+    for s in response.data["results"]:
+        assert s["group"] == student.group.id
+
+    # Той самий RoleBasedPermission — teacher все ще не може створювати
+    response = jwt_client.post("/api/students/", {"full_name": "Новий", "status": "lead"})
+    assert response.status_code == 403

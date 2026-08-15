@@ -1,9 +1,10 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class NotificationLog(models.Model):
     TYPE_CHOICES = [("email", "Email"), ("telegram", "Telegram")]
-    STATUS_CHOICES = [("sent", "Sent"), ("failed", "Failed")]
+    STATUS_CHOICES = [("sent", "Надіслано"), ("failed", "Помилка")]
     NOTIFICATION_TYPE_CHOICES = [
         ("payment_reminder", "Нагадування про оплату"),
         ("welcome", "Вітання нового користувача"),
@@ -12,17 +13,20 @@ class NotificationLog(models.Model):
         ("broadcast", "Розсилка"),
     ]
 
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, verbose_name=_("Тип"))
     notification_type = models.CharField(
         max_length=30,
         choices=NOTIFICATION_TYPE_CHOICES,
         default="payment_reminder",
         db_index=True,
+        verbose_name=_("Вид сповіщення"),
     )
-    recipient = models.CharField(max_length=255)
-    message = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="sent")
-    sent_at = models.DateTimeField(auto_now_add=True)
+    recipient = models.CharField(max_length=255, verbose_name=_("Отримувач"))
+    message = models.TextField(verbose_name=_("Повідомлення"))
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="sent", verbose_name=_("Статус")
+    )
+    sent_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Дата надсилання"))
 
     class Meta:
         verbose_name = "Лог сповіщення"
