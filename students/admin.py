@@ -9,8 +9,19 @@ from unfold.admin import ModelAdmin
 
 from accounts.models import User
 from accounts.roles import OPERATIONAL_ROLES, Roles
+from dashboard.resources import VerboseNameResource
 from students.models import Course, Parent, Student
 from students.services import scope_students
+
+
+class StudentResource(VerboseNameResource):
+    class Meta:
+        model = Student
+
+
+class ParentResource(VerboseNameResource):
+    class Meta:
+        model = Parent
 
 
 def _generate_password(length=12):
@@ -87,6 +98,7 @@ class CourseAdmin(ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(ExportMixin, ModelAdmin):
+    resource_class = StudentResource
     list_display = ("full_name", "course", "group", "status", "email", "user")
     list_filter = ("status", "course", "group")
     search_fields = ("full_name", "phone", "telegram_username", "email")
@@ -113,6 +125,7 @@ class StudentAdmin(ExportMixin, ModelAdmin):
 
 @admin.register(Parent)
 class ParentAdmin(ExportMixin, ModelAdmin):
+    resource_class = ParentResource
     list_display = ("full_name", "phone", "email", "user")
     search_fields = ("full_name", "phone", "email")
     actions = [create_login_action]

@@ -5,10 +5,17 @@ from unfold.admin import ModelAdmin
 
 from accounts.models import User
 from accounts.roles import OPERATIONAL_ROLES, Roles
+from dashboard.resources import VerboseNameResource
+
+
+class UserResource(VerboseNameResource):
+    class Meta:
+        model = User
 
 
 @admin.register(User)
 class CustomUserAdmin(ExportMixin, ModelAdmin, UserAdmin):
+    resource_class = UserResource
     list_display = ("username", "email", "role", "is_staff", "is_active")
     list_filter = ("role", "is_staff")
     fieldsets = UserAdmin.fieldsets + (
