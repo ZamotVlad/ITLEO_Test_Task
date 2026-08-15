@@ -1,5 +1,9 @@
 import pytest
 
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
+
+from accounts.models import User
 from students.models import Course, Parent, Student
 
 
@@ -52,3 +56,21 @@ def test_soft_delete_hides_course_from_default_manager():
 
     assert Course.objects.count() == 0
     assert Course.all_objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_api_delete_is_soft_not_permanent():
+    owner = User.objects.create_superuser(
+        username="api_owner_test", password="pass12345", role="owner"
+    )
+    client = APIClient()
+    token, _ = Token.objects.get_or_create(user=owner)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+    student = Student.objects.create(full_name="Тест")
+
+    response = client.delete(f"/api/students/{student.id}/")
+
+    assert response.status_code == 204
+    assert not Student.objects.filter(id=student.id).exists()
+    assert Student.all_objects.filter(id=student.id).exists()
