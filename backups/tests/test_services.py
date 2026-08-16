@@ -4,7 +4,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from backups.models import BackupRecord
-from backups.services import create_backup, prune_old_backups
+from backups.services import (
+    create_backup,
+    prune_old_backups,
+    verify_backup_full,
+    verify_backup_quick,
+)
 
 
 @pytest.mark.django_db
@@ -91,3 +96,134 @@ class TestPruneOldBackups:
             prune_old_backups(keep_days=14)
 
             assert BackupRecord.objects.filter(id=failed.id).exists()
+
+
+@pytest.mark.django_db
+class TestVerifyBackupQuick:
+    def test_missing_file_fails_without_running_subprocess(self, tmp_path):
+        with (
+            patch("backups.services.BACKUP_DIR", tmp_path),
+            patch("backups.services.subprocess.run") as mock_run,
+        ):
+            record = BackupRecord.objects.create(
+                filename="missing.dump", status=BackupRecord.Status.SUCCESS
+            )
+
+            result = verify_backup_quick(record)
+
+            assert result is False
+            mock_run.assert_not_called()
+            record.refresh_from_db()
+            assert record.verified_ok is False
+
+    @patch("backups.services.subprocess.run")
+    def test_valid_archive_marks_verified_true(self, mock_run, tmp_path):
+        with patch("backups.services.BACKUP_DIR", tmp_path):
+            (tmp_path / "good.dump").write_bytes(b"data")
+            record = BackupRecord.objects.create(
+                filename="good.dump", status=BackupRecord.Status.SUCCESS
+            )
+            mock_run.return_value = MagicMock()
+
+            result = verify_backup_quick(record)
+
+            assert result is True
+            record.refresh_from_db()
+            assert record.verified_ok is True
+            assert record.verified_at is not None
+            # не мала чіпати повну перевірку
+            assert record.full_verified_ok is None
+
+    @patch("backups.services.subprocess.run")
+    def test_corrupted_archive_marks_verified_false(self, mock_run, tmp_path):
+        with patch("backups.services.BACKUP_DIR", tmp_path):
+            (tmp_path / "bad.dump").write_bytes(b"not a real dump")
+            record = BackupRecord.objects.create(
+                filename="bad.dump", status=BackupRecord.Status.SUCCESS
+            )
+            mock_run.side_effect = subprocess.CalledProcessError(1, "pg_restore")
+
+            result = verify_backup_quick(record)
+
+            assert result is False
+
+    def test_skipped_for_already_failed_record(self, tmp_path):
+        with patch("backups.services.subprocess.run") as mock_run:
+            record = BackupRecord.objects.create(
+                filename="x.dump", status=BackupRecord.Status.FAILED
+            )
+
+            result = verify_backup_quick(record)
+
+            assert result is False
+            mock_run.assert_not_called()
+
+
+@pytest.mark.django_db
+class TestVerifyBackupFull:
+    def test_missing_file_fails_without_running_subprocess(self, tmp_path):
+        with (
+            patch("backups.services.BACKUP_DIR", tmp_path),
+            patch("backups.services.subprocess.run") as mock_run,
+        ):
+            record = BackupRecord.objects.create(
+                filename="missing.dump", status=BackupRecord.Status.SUCCESS
+            )
+
+            result = verify_backup_full(record)
+
+            assert result is False
+            mock_run.assert_not_called()
+            record.refresh_from_db()
+            assert record.full_verified_ok is False
+
+    @patch("backups.services.subprocess.run")
+    def test_successful_restore_marks_full_verified_true(self, mock_run, tmp_path):
+        with patch("backups.services.BACKUP_DIR", tmp_path):
+            (tmp_path / "good.dump").write_bytes(b"data")
+            record = BackupRecord.objects.create(
+                filename="good.dump", status=BackupRecord.Status.SUCCESS
+            )
+            mock_run.return_value = MagicMock()
+
+            result = verify_backup_full(record)
+
+            assert result is True
+            record.refresh_from_db()
+            assert record.full_verified_ok is True
+            assert record.full_verified_at is not None
+            # не мала чіпати легку перевірку
+            assert record.verified_ok is None
+
+    @patch("backups.services.subprocess.run")
+    def test_restore_failure_marks_full_verified_false(self, mock_run, tmp_path):
+        with patch("backups.services.BACKUP_DIR", tmp_path):
+            (tmp_path / "bad.dump").write_bytes(b"data")
+            record = BackupRecord.objects.create(
+                filename="bad.dump", status=BackupRecord.Status.SUCCESS
+            )
+
+            # Мок має поводитись як реальний subprocess.run: check=False
+            # (прибиральні виклики dropdb) ніколи не кидає CalledProcessError,
+            # незалежно від коду виходу. Кидаємо тільки для check=True.
+            def fake_run(*args, **kwargs):
+                if kwargs.get("check"):
+                    raise subprocess.CalledProcessError(1, "pg_restore")
+                return MagicMock()
+
+            mock_run.side_effect = fake_run
+
+            result = verify_backup_full(record)
+
+            assert result is False
+
+    def test_skipped_for_already_failed_record(self, tmp_path):
+        with patch("backups.services.subprocess.run") as mock_run:
+            record = BackupRecord.objects.create(
+                filename="x.dump", status=BackupRecord.Status.FAILED
+            )
+
+            result = verify_backup_full(record)
+
+            assert result is False
+            mock_run.assert_not_called()

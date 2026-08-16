@@ -13,6 +13,7 @@ BACKUP_DIR = Path(settings.BASE_DIR) / "backups_storage"
 # Дамп великої бази може тривати довго - краще впасти з чіткою помилкою
 # за таймаутом, ніж зависнути назавжди в cron-задачі.
 DUMP_TIMEOUT = 600
+RESTORE_TIMEOUT = 600
 
 
 def _db_settings():
@@ -85,3 +86,92 @@ def prune_old_backups(keep_days=14):
 
     old_records.delete()
     return removed
+
+
+def verify_backup_quick(record):
+    """
+    Легка щоденна перевірка: pg_restore --list читає лише заголовок архіву
+    (список таблиць/об'єктів), не створює нічого в базі й не потребує
+    прав CREATEDB. Доводить, що файл не пошкоджений і є валідним дампом.
+    """
+    if record.status != BackupRecord.Status.SUCCESS:
+        return False
+
+    file_path = BACKUP_DIR / record.filename
+    if not file_path.exists():
+        _save_quick_verification(record, ok=False)
+        return False
+
+    try:
+        subprocess.run(
+            ["pg_restore", "--list", str(file_path)],
+            check=True,
+            capture_output=True,
+            timeout=60,
+        )
+        ok = True
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        ok = False
+
+    _save_quick_verification(record, ok)
+    return ok
+
+
+def verify_backup_full(record):
+    """
+    Важка перевірка: реально відновлює бекап у тимчасову базу і перевіряє,
+    що процес пройшов без помилок. Тимчасова база видаляється незалежно
+    від результату. Потребує прав CREATEDB на застосунковому користувачі.
+    """
+    if record.status != BackupRecord.Status.SUCCESS:
+        return False
+
+    file_path = BACKUP_DIR / record.filename
+    if not file_path.exists():
+        _save_full_verification(record, ok=False)
+        return False
+
+    host, port, user, password, dbname = _db_settings()
+    env = _env_with_password(password)
+    test_db_name = f"{dbname}_verify_test"
+
+    ok = True
+    try:
+        _run_quiet(["dropdb", "-h", host, "-p", port, "-U", user, "--if-exists", test_db_name], env)
+        subprocess.run(
+            ["createdb", "-h", host, "-p", port, "-U", user, test_db_name],
+            env=env,
+            check=True,
+            capture_output=True,
+            timeout=60,
+        )
+        subprocess.run(
+            ["pg_restore", "-h", host, "-p", port, "-U", user, "-d", test_db_name, str(file_path)],
+            env=env,
+            check=True,
+            capture_output=True,
+            timeout=RESTORE_TIMEOUT,
+        )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        ok = False
+    finally:
+        _run_quiet(["dropdb", "-h", host, "-p", port, "-U", user, "--if-exists", test_db_name], env)
+
+    _save_full_verification(record, ok)
+    return ok
+
+
+def _run_quiet(command, env):
+    subprocess.run(command, env=env, check=False, capture_output=True, timeout=60)
+
+
+def _save_quick_verification(record, ok):
+    record.verified_at = datetime.now(tz=timezone.utc)
+    record.verified_ok = ok
+    record.save(update_fields=["verified_at", "verified_ok"])
+
+
+def _save_full_verification(record, ok):
+    record.full_verified_at = datetime.now(tz=timezone.utc)
+    record.full_verified_ok = ok
+    record.save(update_fields=["full_verified_at", "full_verified_ok"])
