@@ -334,3 +334,138 @@ class TestNotifyScheduleChange:
         notify_schedule_change(999999)  # must simply return, no exception
 
         assert NotificationLog.objects.count() == 0
+
+
+@pytest.mark.django_db
+class TestRemindDebtorsTelegramEdgeCases:
+    @patch("notifications.services.send_telegram_message", return_value=True)
+    def test_parent_without_user_is_skipped(self, mock_send, student_with_chat):
+        Parent.objects.create(full_name="Батько без юзера").students.add(student_with_chat)
+        Payment.objects.create(
+            student=student_with_chat, amount=100, date="2026-08-15", status="debt"
+        )
+
+        remind_debtors_telegram()
+
+        mock_send.assert_called_once()  # тільки студент, не батько без user
+
+    @patch("notifications.services.send_telegram_message", return_value=True)
+    def test_parent_without_chat_id_is_skipped(
+        self, mock_send, student_with_chat, django_user_model
+    ):
+        parent_user = django_user_model.objects.create_user(
+            username="parent_no_chat", role=Roles.PARENT
+        )
+        parent = Parent.objects.create(full_name="Батько без чату", user=parent_user)
+        parent.students.add(student_with_chat)
+        Payment.objects.create(
+            student=student_with_chat, amount=100, date="2026-08-15", status="debt"
+        )
+
+        remind_debtors_telegram()
+
+        mock_send.assert_called_once()  # той самий сценарій - без другого виклику на батька
+
+
+@pytest.mark.django_db
+class TestSendPaymentRemindersParentFailure:
+    @patch("notifications.services.send_mail")
+    def test_parent_email_failure_logged_independently_of_student(
+        self, mock_send_mail, student_with_chat, parent_with_chat
+    ):
+        # перший виклик (студент) успішний, другий (батько) падає
+        mock_send_mail.side_effect = [None, Exception("SMTP down")]
+        Payment.objects.create(
+            student=student_with_chat, amount=100, date="2026-08-15", status="debt"
+        )
+
+        send_payment_reminders()
+
+        student_log = NotificationLog.objects.get(recipient="student@test.com")
+        parent_log = NotificationLog.objects.get(recipient="parent@test.com")
+        assert student_log.status == "sent"
+        assert parent_log.status == "failed"
+
+
+@pytest.mark.django_db
+class TestBroadcastToGroupPartialFailure:
+    @patch("notifications.services.send_telegram_message", side_effect=[True, False])
+    def test_failed_send_counted_as_skipped_not_sent(self, mock_send, django_user_model):
+        group = Group.objects.create(name="Група")
+        for i in range(2):
+            user = django_user_model.objects.create_user(
+                username=f"broadcast_{i}", role=Roles.STUDENT, telegram_chat_id=500 + i
+            )
+            Student.objects.create(full_name=f"Студент {i}", user=user, group=group)
+
+        sent, skipped = broadcast_to_group(group.id, "Текст")
+
+        assert sent == 1
+        assert skipped == 1
+
+
+@pytest.mark.django_db
+class TestSendClassRemindersEdgeCases:
+    @patch("notifications.services.send_telegram_message", return_value=True)
+    def test_student_without_user_is_skipped(self, mock_send):
+        now = datetime.datetime.now(tz=datetime.timezone.utc)
+        target = now + datetime.timedelta(hours=2)
+        group = Group.objects.create(name="Група")
+        Student.objects.create(full_name="Без юзера", group=group)
+        Schedule.objects.create(
+            group=group,
+            weekday=now.weekday(),
+            start_time=target.time().replace(second=0, microsecond=0),
+            end_time=(target + datetime.timedelta(hours=1)).time(),
+        )
+
+        send_class_reminders()
+
+        mock_send.assert_not_called()
+
+    @patch("notifications.services.send_telegram_message", return_value=True)
+    def test_student_without_chat_id_is_skipped(self, mock_send, django_user_model):
+        now = datetime.datetime.now(tz=datetime.timezone.utc)
+        target = now + datetime.timedelta(hours=2)
+        user = django_user_model.objects.create_user(username="no_chat_class", role=Roles.STUDENT)
+        group = Group.objects.create(name="Група")
+        Student.objects.create(full_name="Без чату", user=user, group=group)
+        Schedule.objects.create(
+            group=group,
+            weekday=now.weekday(),
+            start_time=target.time().replace(second=0, microsecond=0),
+            end_time=(target + datetime.timedelta(hours=1)).time(),
+        )
+
+        send_class_reminders()
+
+        mock_send.assert_not_called()
+
+
+@pytest.mark.django_db
+class TestNotifyScheduleChangeEdgeCases:
+    @patch("notifications.services.send_telegram_message", return_value=True)
+    def test_student_without_user_is_skipped(self, mock_send):
+        group = Group.objects.create(name="Група")
+        Student.objects.create(full_name="Без юзера", group=group)
+        schedule = Schedule.objects.create(
+            group=group, weekday=0, start_time="10:00", end_time="11:00"
+        )
+
+        notify_schedule_change(schedule.id)
+
+        mock_send.assert_not_called()
+
+    @patch("notifications.services.send_telegram_message", return_value=True)
+    def test_parent_without_user_is_skipped(self, mock_send, student_with_chat):
+        group = Group.objects.create(name="Група")
+        student_with_chat.group = group
+        student_with_chat.save()
+        Parent.objects.create(full_name="Батько без юзера").students.add(student_with_chat)
+        schedule = Schedule.objects.create(
+            group=group, weekday=0, start_time="10:00", end_time="11:00"
+        )
+
+        notify_schedule_change(schedule.id)
+
+        mock_send.assert_called_once()  # тільки студент

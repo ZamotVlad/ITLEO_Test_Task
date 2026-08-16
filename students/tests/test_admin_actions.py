@@ -7,7 +7,7 @@ from django.core import mail
 from accounts.models import User
 from accounts.roles import Roles
 from students.admin import StudentAdmin, create_login_action
-from students.models import Parent, Student
+from students.models import Course, Parent, Student
 
 
 def _prepare_request(rf, user):
@@ -122,3 +122,63 @@ class TestCreateLoginAction:
         assert len(messages) == 1
         assert "Створено: 1" in str(messages[0])
         assert "пропущено: 1" in str(messages[0])
+
+
+@pytest.mark.django_db
+class TestAdminDeleteIsSoftAcrossAllModels:
+    def test_course_admin_single_delete_is_soft(self, client, owner):
+        course = Course.objects.create(name="Тест")
+        client.force_login(owner)
+
+        client.post(f"/admin/students/course/{course.id}/delete/", {"post": "yes"})
+
+        assert not Course.objects.filter(id=course.id).exists()
+        assert Course.all_objects.filter(id=course.id).exists()
+
+    def test_parent_admin_single_delete_is_soft(self, client, owner):
+        parent = Parent.objects.create(full_name="Тест")
+        client.force_login(owner)
+
+        client.post(f"/admin/students/parent/{parent.id}/delete/", {"post": "yes"})
+
+        assert not Parent.objects.filter(id=parent.id).exists()
+        assert Parent.all_objects.filter(id=parent.id).exists()
+
+    def test_student_admin_bulk_delete_is_soft(self, client, owner):
+        s1 = Student.objects.create(full_name="Перший")
+        s2 = Student.objects.create(full_name="Другий")
+        client.force_login(owner)
+
+        client.post(
+            "/admin/students/student/",
+            {"action": "delete_selected", "_selected_action": [s1.id, s2.id], "post": "yes"},
+        )
+
+        assert Student.objects.count() == 0
+        assert Student.all_objects.count() == 2
+
+    def test_course_admin_bulk_delete_is_soft(self, client, owner):
+        c1 = Course.objects.create(name="Перший")
+        c2 = Course.objects.create(name="Другий")
+        client.force_login(owner)
+
+        client.post(
+            "/admin/students/course/",
+            {"action": "delete_selected", "_selected_action": [c1.id, c2.id], "post": "yes"},
+        )
+
+        assert Course.objects.count() == 0
+        assert Course.all_objects.count() == 2
+
+    def test_parent_admin_bulk_delete_is_soft(self, client, owner):
+        p1 = Parent.objects.create(full_name="Перший")
+        p2 = Parent.objects.create(full_name="Другий")
+        client.force_login(owner)
+
+        client.post(
+            "/admin/students/parent/",
+            {"action": "delete_selected", "_selected_action": [p1.id, p2.id], "post": "yes"},
+        )
+
+        assert Parent.objects.count() == 0
+        assert Parent.all_objects.count() == 2
