@@ -4,6 +4,8 @@ from rest_framework.test import APIClient
 
 from accounts.models import User
 from students.models import Course, Parent, Student
+from students.permissions import RoleBasedPermission
+from students.services import scope_students
 
 
 @pytest.mark.django_db
@@ -73,3 +75,30 @@ def test_api_delete_is_soft_not_permanent():
     assert response.status_code == 204
     assert not Student.objects.filter(id=student.id).exists()
     assert Student.all_objects.filter(id=student.id).exists()
+
+
+@pytest.mark.django_db
+def test_scope_students_excludes_soft_deleted_even_for_owner(django_user_model):
+    from accounts.roles import Roles
+
+    owner = django_user_model.objects.create_user(username="owner_scope_test", role=Roles.OWNER)
+    student = Student.objects.create(full_name="Тест")
+    student.soft_delete()
+
+    result = scope_students(owner)
+
+    assert student not in result
+
+
+@pytest.mark.django_db
+def test_permission_resolve_ignores_soft_deleted_parent():
+    from students.models import Parent
+
+    student = Student.objects.create(full_name="Тест")
+    parent = Parent.objects.create(full_name="Батько")
+    parent.students.add(student)
+    parent.soft_delete()
+
+    chain = RoleBasedPermission._resolve(student)
+
+    assert chain["parent_user_ids"] == []
