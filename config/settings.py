@@ -309,6 +309,18 @@ UNFOLD = {
                     },
                 ],
             },
+            {
+                "title": "Обслуговування",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Резервні копії",
+                        "icon": "backup",
+                        "link": "/admin/backups/backuprecord/",
+                        "permission": lambda request: request.user.is_staff,
+                    },
+                ],
+            },
         ],
     },
 }
