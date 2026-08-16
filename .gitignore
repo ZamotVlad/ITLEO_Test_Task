@@ -339,4 +339,6 @@ $RECYCLE.BIN/
 
 staticfiles/
 
+backups_storage/
+
 # End of https://www.toptal.com/developers/gitignore/api/database,python,venv,windows,django,visualstudiocode,redis

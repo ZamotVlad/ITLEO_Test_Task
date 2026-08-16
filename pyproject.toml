@@ -7,7 +7,7 @@ select = ["E", "F", "I", "W"]
 ignore = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["accounts", "students", "schedule", "dashboard", "integrations", "notifications"]
+known-first-party = ["accounts", "students", "schedule", "dashboard", "integrations", "notifications", "backups"]
 
 
 [tool.pytest.ini_options]
