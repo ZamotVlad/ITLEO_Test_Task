@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "notifications",
     "integrations",
     "dashboard",
+    "backups",
 ]
 
 MIDDLEWARE = [
