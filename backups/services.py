@@ -6,6 +6,11 @@ from pathlib import Path
 
 from django.conf import settings
 
+from accounts.models import User
+from accounts.roles import Roles
+from notifications.models import NotificationLog
+from notifications.services import send_telegram_message
+
 from .models import BackupRecord
 
 BACKUP_DIR = Path(settings.BASE_DIR) / "backups_storage"
@@ -47,12 +52,14 @@ def create_backup():
             timeout=DUMP_TIMEOUT,
         )
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
-        return BackupRecord.objects.create(
+        record = BackupRecord.objects.create(
             filename=filename,
             status=BackupRecord.Status.FAILED,
             error_message=_extract_error(exc)[:2000],
             duration_seconds=time.monotonic() - started,
         )
+        _notify_backup_failure("не вдалося створити дамп бази", record.error_message[:300])
+        return record
 
     size = output_path.stat().st_size if output_path.exists() else None
     return BackupRecord.objects.create(
@@ -100,6 +107,7 @@ def verify_backup_quick(record):
     file_path = BACKUP_DIR / record.filename
     if not file_path.exists():
         _save_quick_verification(record, ok=False)
+        _notify_backup_failure("файл бекапу відсутній на диску", record.filename)
         return False
 
     try:
@@ -114,6 +122,10 @@ def verify_backup_quick(record):
         ok = False
 
     _save_quick_verification(record, ok)
+    if not ok:
+        _notify_backup_failure(
+            "легка перевірка не пройдена, файл може бути пошкоджений", record.filename
+        )
     return ok
 
 
@@ -129,6 +141,7 @@ def verify_backup_full(record):
     file_path = BACKUP_DIR / record.filename
     if not file_path.exists():
         _save_full_verification(record, ok=False)
+        _notify_backup_failure("файл бекапу відсутній на диску", record.filename)
         return False
 
     host, port, user, password, dbname = _db_settings()
@@ -158,6 +171,8 @@ def verify_backup_full(record):
         _run_quiet(["dropdb", "-h", host, "-p", port, "-U", user, "--if-exists", test_db_name], env)
 
     _save_full_verification(record, ok)
+    if not ok:
+        _notify_backup_failure("повна перевірка відновлення не пройдена", record.filename)
     return ok
 
 
@@ -175,3 +190,23 @@ def _save_full_verification(record, ok):
     record.full_verified_at = datetime.now(tz=timezone.utc)
     record.full_verified_ok = ok
     record.save(update_fields=["full_verified_at", "full_verified_ok"])
+
+
+def _notify_backup_failure(reason, detail):
+    """
+    Сповіщає в Telegram усіх користувачів з роллю owner, у кого заповнений
+    telegram_chat_id. Використовує ту саму інфраструктуру, що й
+    notifications/services.py, щоб не дублювати логіку відправки.
+    """
+    owners = User.objects.filter(role=Roles.OWNER, telegram_chat_id__isnull=False)
+    text = f"⚠️ Бекап бази ITLEO: {reason}\n{detail}"
+
+    for owner in owners:
+        success = send_telegram_message(owner.telegram_chat_id, text)
+        NotificationLog.objects.create(
+            type="telegram",
+            notification_type="backup_failed",
+            recipient=str(owner.telegram_chat_id),
+            message=text,
+            status="sent" if success else "failed",
+        )
