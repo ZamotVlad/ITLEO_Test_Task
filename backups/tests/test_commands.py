@@ -1,3 +1,4 @@
+import subprocess
 from io import StringIO
 from unittest.mock import MagicMock, patch
 
@@ -27,6 +28,17 @@ class TestBackupDbCommand:
             assert BackupRecord.objects.filter(status=BackupRecord.Status.SUCCESS).exists()
             assert "Бекап створено" in out.getvalue()
 
+    @patch("backups.services.subprocess.run")
+    def test_command_reports_failure(self, mock_run, tmp_path):
+        with patch("backups.services.BACKUP_DIR", tmp_path):
+            mock_run.side_effect = subprocess.CalledProcessError(1, "pg_dump", stderr=b"boom")
+
+            err = StringIO()
+            call_command("backup_db", stderr=err)
+
+            assert BackupRecord.objects.filter(status=BackupRecord.Status.FAILED).exists()
+            assert "не вдався" in err.getvalue()
+
 
 @pytest.mark.django_db
 class TestVerifyLatestBackupCommand:
@@ -48,6 +60,18 @@ class TestVerifyLatestBackupCommand:
 
             assert "пройшов легку перевірку" in out.getvalue()
 
+    @patch("backups.services.subprocess.run")
+    def test_corrupted_backup_reports_failure(self, mock_run, tmp_path):
+        with patch("backups.services.BACKUP_DIR", tmp_path):
+            (tmp_path / "bad.dump").write_bytes(b"data")
+            BackupRecord.objects.create(filename="bad.dump", status=BackupRecord.Status.SUCCESS)
+            mock_run.side_effect = subprocess.CalledProcessError(1, "pg_restore")
+
+            err = StringIO()
+            call_command("verify_latest_backup", stderr=err)
+
+            assert "НЕ пройшов легку перевірку" in err.getvalue()
+
 
 @pytest.mark.django_db
 class TestVerifyBackupFullCommand:
@@ -56,3 +80,35 @@ class TestVerifyBackupFullCommand:
         call_command("verify_backup_full", stderr=err)
 
         assert "Успішних бекапів не знайдено" in err.getvalue()
+
+    @patch("backups.services.subprocess.run")
+    def test_successful_restore_reports_success(self, mock_run, tmp_path):
+        with patch("backups.services.BACKUP_DIR", tmp_path):
+            (tmp_path / "good.dump").write_bytes(b"data")
+            BackupRecord.objects.create(filename="good.dump", status=BackupRecord.Status.SUCCESS)
+            mock_run.return_value = MagicMock()
+
+            out = StringIO()
+            call_command("verify_backup_full", stdout=out)
+
+            assert "пройшов повну перевірку" in out.getvalue()
+
+    @patch("backups.services.subprocess.run")
+    def test_failed_restore_reports_failure(self, mock_run, tmp_path):
+        with patch("backups.services.BACKUP_DIR", tmp_path):
+            (tmp_path / "bad.dump").write_bytes(b"data")
+            BackupRecord.objects.create(filename="bad.dump", status=BackupRecord.Status.SUCCESS)
+
+            # check=False виклики (прибирання тимчасової бази в finally) не
+            # мають кидати помилку, тільки check=True (createdb/pg_restore).
+            def fake_run(*args, **kwargs):
+                if kwargs.get("check"):
+                    raise subprocess.CalledProcessError(1, "pg_restore")
+                return MagicMock()
+
+            mock_run.side_effect = fake_run
+
+            err = StringIO()
+            call_command("verify_backup_full", stderr=err)
+
+            assert "НЕ пройшов повну перевірку" in err.getvalue()
