@@ -98,6 +98,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+CSRF_FAILURE_VIEW = "config.views.csrf_failure"
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block page_title %}Помилка{% endblock %} - ITLEO Academy</title>
+<link rel="stylesheet" href="{% static 'css/errors.css' %}">
+</head>
+<body class="error-page {% block body_class %}{% endblock %}">
+<main class="error-card">
+<div class="error-illustration">{% block error_illustration %}{% endblock %}</div>
+<p class="error-code">{% block error_code %}{% endblock %}</p>
+<h1 class="error-title">{% block error_title %}{% endblock %}</h1>
+<p class="error-message">{% block error_message %}{% endblock %}</p>
+<div class="error-actions">{% block error_actions %}<a href="/" class="btn btn-primary">На головну</a> <a href="javascript:void(0)" onclick="history.back()" class="btn btn-secondary">Назад</a>{% endblock %}</div>
+</main>
+</body>
+</html>

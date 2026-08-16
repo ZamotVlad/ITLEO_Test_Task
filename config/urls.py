@@ -1,3 +1,6 @@
+from functools import partial
+
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
@@ -11,6 +14,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 from accounts.views import CustomTokenObtainPairView, UserViewSet
+from config.views import preview_error_page
 from dashboard.views import DashboardStatsView
 from notifications.views import NotificationViewSet
 from payments.views import PaymentViewSet
@@ -45,3 +49,11 @@ urlpatterns = [
     path("api/dashboard/", DashboardStatsView.as_view(), name="dashboard-stats"),
     path("integrations/", include("integrations.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path("debug/errors/400/", partial(preview_error_page, template_name="400.html")),
+        path("debug/errors/403/", partial(preview_error_page, template_name="403.html")),
+        path("debug/errors/404/", partial(preview_error_page, template_name="404.html")),
+        path("debug/errors/500/", partial(preview_error_page, template_name="500.html")),
+    ]
